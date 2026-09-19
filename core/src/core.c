@@ -1251,10 +1251,15 @@ int fvs_payment_confirm(fvs_ctx *ctx,const char *attempt_id,const char *provider
     if(strcmp(astatus,"paid")==0){
         rc=tx_commit(ctx);
         if(rc==FVS_OK){
-            rc=queryf(ctx,&res,"SELECT id FROM orders WHERE payment_attempt_id='%s'",attempt_id);
+            rc=queryf(ctx,&res,"SELECT id,total_minor,discount_minor,currency FROM orders WHERE payment_attempt_id='%s'",attempt_id);
             if(rc==FVS_OK){
                 r=mysql_fetch_row(res);
-                if(r){jsonw w;jw_init(&w,out,out_size);jw_puts(&w,"{\"status\":\"confirmed\",\"order_id\":");jw_string(&w,r[0]);jw_puts(&w,"}");rc=jw_result(ctx,&w);}else rc=FVS_ERR_STATE;
+                if(r){
+                    long long total=r[1]?strtoll(r[1],NULL,10):0LL;
+                    long long discount=r[2]?strtoll(r[2],NULL,10):0LL;
+                    const char *order_currency=r[3]?r[3]:"";
+                    jsonw w;jw_init(&w,out,out_size);jw_puts(&w,"{\"status\":\"confirmed\",\"order_id\":");jw_string(&w,r[0]);jw_printf(&w,",\"total_minor\":%lld,\"discount_minor\":%lld,\"currency\":",total,discount);jw_string(&w,order_currency);jw_puts(&w,"}");rc=jw_result(ctx,&w);
+                }else rc=FVS_ERR_STATE;
                 mysql_free_result(res);
             }
         }
