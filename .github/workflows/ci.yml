@@ -1,0 +1,24 @@
+name: FVS CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build pkg-config libmariadb-dev libssl-dev php-cli nginx clang
+      - name: Release + sanitizers + shim contracts
+        run: make test
+      - name: Static analyzers
+        run: make analyze
+      - name: Static lint
+        run: make lint
+      - name: MySQL 8 integration
+        run: ./scripts/test_mysql_docker.sh
