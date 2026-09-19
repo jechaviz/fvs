@@ -303,12 +303,12 @@ def main():
     # Guarded abandonment recovery: exactly one job, never reconciliation/manual-review, cancel if booking converts.
     ab_campaign=core.marketing_campaign_create('Abandonment '+tag,'bookings','guarded',0,0,'MXN','abandon-'+tag,'itest-admin')
     ab_campaign_id=ab_campaign['campaign_id'];core.marketing_campaign_approve(ab_campaign_id,'itest-approver')
-    ab_creative=core.marketing_creative_add(ab_campaign_id,'webhook','RECOVER','Completa tu reserva','Tu checkout sigue disponible','Continuar','https://example.test/recover','',False,'itest-admin')
+    ab_creative=core.marketing_creative_add(ab_campaign_id,'tiktok','RECOVER','Completa tu reserva','Tu checkout sigue disponible','Continuar','https://example.test/recover','',False,'itest-admin')
     ab_creative_id=ab_creative['creative_id'];core.marketing_creative_approve(ab_creative_id,'itest-approver')
     ab_tag=uuid.uuid4().hex[:8];ab_unit='AB-'+ab_tag
     ab_row={'source_ref':'abandon:'+ab_tag,'resort':'Abandonment Resort','unit_code':ab_unit,'unit_name':'Recovery Suite','city':'Queretaro','country':'MX','check_in':'2028-01-10','check_out':'2028-01-17','max_guests':4,'price_minor':1100000,'currency':'MXN','active':True}
     core.inventory_upsert(ab_row);ab_slot=next(x['id'] for x in core.inventory_search('2028-01-01','2028-01-31',2)['items'] if x['unit_code']==ab_unit)
-    ab_cid,ab_sec=core.cart_create();core.cart_add(ab_cid,ab_sec,ab_slot,2,900);core.cart_set_origin(ab_cid,ab_sec,channel='webhook',campaign_id=ab_campaign_id,creative_id=ab_creative_id)
+    ab_cid,ab_sec=core.cart_create();core.cart_add(ab_cid,ab_sec,ab_slot,2,900);core.cart_set_origin(ab_cid,ab_sec,channel='tiktok',campaign_id=ab_campaign_id,creative_id=ab_creative_id)
     ab_attempt=core.checkout_begin(ab_cid,ab_sec,'stripe','abandon@example.com','itest-v1',1200)
     sql_exec(f"UPDATE payment_attempts SET updated_at=TIMESTAMPADD(HOUR,-2,UTC_TIMESTAMP()) WHERE id='{ab_attempt['attempt_id']}'")
     scan1=core.abandonment_scan(1800,50)

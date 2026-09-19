@@ -133,3 +133,15 @@ START 2026-09-19
 Scope: detect stale checkout attempts without orders, exclude payment reconciliation/manual
 review states, create exactly one guarded recovery job for approved attributed campaigns,
 cancel pending recovery if a booking subsequently converts, and expose recovery-state metrics.
+
+Checkpoint WAVE 5 — CI evidence
+GitHub Actions 35433469976 passed manifest, architecture, supply-chain, build,
+sanitizers, shim contracts, static analyzers and lint, then failed in MySQL
+integration before the abandonment scanner: the fixture used channel='webhook'
+with cart_set_origin, while cart origin intentionally accepts only commercial/social
+channels. Production scanner logic was not implicated.
+
+#### WAVE 5.1 — Correct commercial-origin fixture
+START 2026-09-19
+Scope: align the recovery fixture to a valid tiktok campaign/creative/cart origin,
+preserve all guarded-abandonment invariants, and rerun the full CI/MySQL gate.
