@@ -71,3 +71,17 @@ of compiler-warning formatting; MySQL recovery transition tests passed.
 START 2026-09-19
 Scope: reproducible relevance metrics, fixed evaluation corpus, online zero-result
 quality telemetry and versioned ranking evidence.
+
+#### WAVE 3.1 — Fixed corpus & metric kernel
+START 2026-09-19
+Scope: commit an isolated ranking corpus and deterministic MRR/NDCG@10/Precision@10
+math so relevance quality can be reproduced independent of incidental integration data.
+
+DONE 2026-09-19
+Result: isolated search-v1 corpus and deterministic metric kernel prepared without
+growing core.c or the HTTP hotspots.
+
+#### WAVE 3.2 — Versioned ranking evidence & zero-result telemetry
+START 2026-09-19
+Scope: persist corpus SHA + ranking metrics, centralize ranking_version in the C
+core, expose online zero-result/ranking dashboards, and validate against MySQL 8.
