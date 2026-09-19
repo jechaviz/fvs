@@ -360,6 +360,7 @@ def main():
     core.marketing_metric_upsert(stop_id,'google',today,1000,30,10000,0,0,0,'MXN')
     stopped=core.growth_loop_run(7,50);check(stopped['scheduled']>=1,stopped)
     stop_job=sql_value(f"SELECT job_id FROM marketing_growth_decisions WHERE campaign_id='{stop_id}' AND action='pause'")
+    check(sql_value(f"SELECT scheduled_at<=UTC_TIMESTAMP(6) FROM marketing_jobs WHERE id='{stop_job}'")=='1','new growth job should be immediately due at DATETIME(6) precision')
     stop_claim=None
     for _ in range(20):
         j=core.marketing_job_claim(growth_owner,120)

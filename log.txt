@@ -184,3 +184,20 @@ START 2026-09-19
 Scope: retain the original proven normal claim predicate, add the managed
 closed_loop_growth update-budget branch as one balanced auditable OR clause,
 and rerun the complete gate without weakening any financial guardrail.
+
+DONE WAVE 6.2 — Claim predicate SQL repair
+Result: the managed OR predicate is syntactically valid and warning-clean. GitHub
+Actions 35434868127 reached MySQL and proved the closed-loop decision was created,
+but a newly created stop-loss job was not immediately claimable.
+
+Checkpoint WAVE 6.2 — temporal precision finding
+Jobs are scheduled with UTC_TIMESTAMP(6), while marketing_runtime.c compared their
+DATETIME(6) values to UTC_TIMESTAMP() at whole-second precision. A job created in
+the current fractional second can therefore be temporarily ineligible despite
+scheduled_at being "now".
+
+#### WAVE 6.3 — Microsecond-consistent job claiming
+START 2026-09-19
+Scope: compare scheduled_at/next_attempt_at/lease_until using UTC_TIMESTAMP(6),
+retain the exact managed-growth predicate and all budget/ROAS guardrails, add an
+immediate-claim regression assertion, and rerun the full CI/MySQL gate.
