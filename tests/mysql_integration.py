@@ -226,6 +226,8 @@ def main():
     core.marketing_campaign_configure(campaign_id,max_daily_spend_minor=45000,frequency_cap_7d=5,target_roas_bps=25000,stop_loss_minor=180000,audience={'segment':'itest'},geo={'countries':['MX']},placements={'channels':['webhook']},optimization_rules={'pause_below_roas_bps':12000},experiment={'allocation':'50/50'},actor='itest-admin')
     creative=core.marketing_creative_add(campaign_id,'webhook','A','Reserva tu semana','Disponibilidad limitada de integración','Reservar','https://example.test/stay','',True,'itest-admin')
     creative_id=creative['creative_id']
+    creative_b=core.marketing_creative_add(campaign_id,'webhook','B','Reserva tu estancia','Variante B controlada','Reservar','https://example.test/stay-b','',False,'itest-admin')
+    creative_b_id=creative_b['creative_id']
     try:
         core.marketing_job_schedule(campaign_id,creative_id,'webhook','publish','2026-01-01 00:00:00',{'test':True},'itest-admin')
         raise AssertionError('unapproved campaign/creative scheduled a marketing job')
@@ -233,6 +235,7 @@ def main():
         check(e.code==4,f'unexpected marketing approval-gate code {e.code}')
     core.marketing_campaign_approve(campaign_id,'itest-approver')
     core.marketing_creative_approve(creative_id,'itest-approver')
+    core.marketing_creative_approve(creative_b_id,'itest-approver')
     scheduled=core.marketing_job_schedule(campaign_id,creative_id,'webhook','publish','2026-01-01 00:00:00',{'test':True},'itest-admin')
     owner='itest-marketing:'+tag
     claimed=core.marketing_job_claim(owner,120)
@@ -249,6 +252,9 @@ def main():
     core.marketing_metric_upsert(campaign_id,'webhook','2026-09-17',10000,325,20000,21,4,120000,'MXN')
     visitor=str(uuid.uuid4());session=str(uuid.uuid4())
     core.marketing_attribution_record(campaign_id=campaign_id,channel='webhook',creative_id=creative_id,visitor_id=visitor,session_id=session,event_type='landing',utm_source='itest',utm_medium='paid-social',utm_campaign='itest-'+tag,utm_content='A',referrer='https://example.test/')
+    for variant_id,variant_key in [(creative_id,'A'),(creative_b_id,'B')]:
+        for ix in range(40):
+            core.marketing_attribution_record(campaign_id=campaign_id,channel='webhook',creative_id=variant_id,visitor_id=str(uuid.uuid4()),session_id=str(uuid.uuid4()),event_type='landing',utm_source='itest',utm_medium='paid-social',utm_campaign='itest-'+tag,utm_content=variant_key,referrer='https://example.test/')
     dashboard=core.marketing_dashboard(730)
     check(int(dashboard.get('spend_minor') or 0)>=20000 and int(dashboard.get('revenue_minor') or 0)>=120000,'marketing dashboard did not aggregate normalized metrics')
     # Once normalized provider spend reaches the approved lifetime budget, publish jobs remain unclaimed.
@@ -285,6 +291,14 @@ def main():
     check(sql_value(f"SELECT bookings FROM social_sales_links WHERE token='{social_link['token']}'")=="1",'social sale booking counter mismatch')
     check(sql_value(f"SELECT CONCAT(r.bookings,':',r.revenue_minor) FROM social_sales_link_revenue r JOIN social_sales_links l ON l.id=r.link_id WHERE l.token='{social_link['token']}' AND r.currency='MXN'")==f"1:{social_attempt['amount_minor']}",'social sale MXN revenue counter mismatch')
     check(sql_value(f"SELECT COUNT(*) FROM marketing_jobs WHERE campaign_id='{campaign_id}' AND channel='tiktok' AND action='send_conversion' AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.order_id'))='{social_order['order_id']}'")=='1','social booking did not schedule conversion callback')
+    evidence=core.experiment_snapshot(campaign_id,730)
+    check(evidence['automatic_winner_selection'] is False and evidence['variant_count']==2,evidence)
+    variants={x['variant_key']:x for x in evidence['variants']}
+    check(variants['A']['exposures']>=40 and variants['A']['bookings']>=1 and variants['A']['sufficient_sample'],variants)
+    check(variants['B']['exposures']>=40 and variants['B']['bookings']==0 and variants['B']['sufficient_sample'],variants)
+    check(0.0<=variants['A']['wilson95'][0]<=variants['A']['conversion']<=variants['A']['wilson95'][1]<=1.0,variants['A'])
+    experiment_dash=core.experiment_dashboard(730)
+    check(experiment_dash['automatic_winner_selection'] is False and any(x['snapshot_id']==evidence['snapshot_id'] for x in experiment_dash['evidence']),experiment_dash)
     buyer_points=int(sql_value("SELECT points_balance FROM commerce_loyalty_accounts WHERE email_hash=UNHEX(SHA2('social-itest@example.com',256))"));check(buyer_points==156,f'buyer loyalty mismatch: {buyer_points}')
 
     # Social attribution is multi-currency safe: revenue is bucketed by currency instead of mixed in the link row.

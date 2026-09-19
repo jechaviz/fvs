@@ -269,6 +269,8 @@ lib.fvs_marketing_job_nack.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctype
 lib.fvs_marketing_metric_upsert.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_ulonglong,ctypes.c_ulonglong,ctypes.c_longlong,ctypes.c_ulonglong,ctypes.c_ulonglong,ctypes.c_longlong,ctypes.c_char_p];lib.fvs_marketing_metric_upsert.restype=ctypes.c_int
 lib.fvs_marketing_attribution_record.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_longlong,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p];lib.fvs_marketing_attribution_record.restype=ctypes.c_int
 lib.fvs_marketing_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_marketing_dashboard.restype=ctypes.c_int
+lib.fvs_experiment_snapshot.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_experiment_snapshot.restype=ctypes.c_int
+lib.fvs_experiment_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_experiment_dashboard.restype=ctypes.c_int
 lib.fvs_search_ranking_version.argtypes=[];lib.fvs_search_ranking_version.restype=ctypes.c_char_p
 lib.fvs_search_eval_record.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_uint,ctypes.c_uint,ctypes.c_uint,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_search_eval_record.restype=ctypes.c_int
 lib.fvs_search_quality_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_search_quality_dashboard.restype=ctypes.c_int
@@ -352,6 +354,9 @@ def marketing_metric_upsert(campaign_id,channel,metric_date,impressions,clicks,s
 def marketing_attribution_record(**v):
     c=ctx();rc=lib.fvs_marketing_attribution_record(c,b(v.get('campaign_id') or ''),b(v.get('channel') or ''),b(v.get('creative_id') or ''),b(v.get('visitor_id') or ''),b(v.get('session_id') or ''),b(v.get('order_id') or ''),b(v['event_type']),int(v.get('value_minor') or 0),b(v.get('currency') or ''),b(v.get('utm_source') or ''),b(v.get('utm_medium') or ''),b(v.get('utm_campaign') or ''),b(v.get('utm_content') or ''),b(v.get('referrer') or ''))
     if rc:_err(c,rc)
+def experiment_snapshot(campaign_id,days=30): return _json_call(lib.fvs_experiment_snapshot,b(campaign_id),int(days))
+def experiment_dashboard(days=30): return _json_call(lib.fvs_experiment_dashboard,int(days))
+
 def search_eval_record(ranking_version,corpus_sha256,mrr,ndcg10,precision10,query_count):
     ppm=lambda x:max(0,min(1000000,int(round(float(x)*1000000))))
     return _json_call(lib.fvs_search_eval_record,b(ranking_version),b(corpus_sha256),ppm(mrr),ppm(ndcg10),ppm(precision10),int(query_count))
@@ -380,6 +385,8 @@ def marketing_dashboard(days=30):
     except Exception: result["recovery"]={"unavailable":True}
     try: result["search_quality"]=search_quality_dashboard(days)
     except Exception: result["search_quality"]={"unavailable":True}
+    try: result["experiments"]=experiment_dashboard(days)
+    except Exception: result["experiments"]={"unavailable":True}
     return result
 
 def commerce_home(): return _json_call(lib.fvs_commerce_home)

@@ -513,6 +513,27 @@ CREATE TABLE IF NOT EXISTS commerce_events (
   INDEX ix_commerce_event_currency(currency,event_type,created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE IF NOT EXISTS marketing_experiment_evidence (
+  id CHAR(36) PRIMARY KEY,
+  snapshot_id CHAR(36) NOT NULL,
+  campaign_id CHAR(36) NOT NULL,
+  creative_id CHAR(36) NOT NULL,
+  variant_key VARCHAR(64) NOT NULL,
+  window_days SMALLINT UNSIGNED NOT NULL,
+  exposures BIGINT UNSIGNED NOT NULL,
+  bookings BIGINT UNSIGNED NOT NULL,
+  conversion_ppm INT UNSIGNED NOT NULL,
+  wilson_low_ppm INT UNSIGNED NOT NULL,
+  wilson_high_ppm INT UNSIGNED NOT NULL,
+  attribution_consistent TINYINT(1) NOT NULL,
+  sufficient_sample TINYINT(1) NOT NULL,
+  created_at DATETIME(6) NOT NULL,
+  CONSTRAINT fk_experiment_evidence_campaign FOREIGN KEY(campaign_id) REFERENCES marketing_campaigns(id) ON DELETE CASCADE,
+  CONSTRAINT fk_experiment_evidence_creative FOREIGN KEY(creative_id) REFERENCES marketing_creatives(id) ON DELETE CASCADE,
+  INDEX ix_experiment_campaign(campaign_id,created_at),
+  INDEX ix_experiment_snapshot(snapshot_id,variant_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE IF NOT EXISTS search_eval_runs (
   id CHAR(36) PRIMARY KEY,
   ranking_version VARCHAR(48) NOT NULL,

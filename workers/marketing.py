@@ -57,6 +57,7 @@ def dispatch(job:dict)->str:
     if job.get('action')=='sync_metrics' and isinstance(result.get('metrics'),dict):
         m=result['metrics']; metric_date=str(m.get('metric_date') or time.strftime('%Y-%m-%d',time.gmtime()))
         core.marketing_metric_upsert(job['campaign_id'],channel,metric_date,int(m.get('impressions') or 0),int(m.get('clicks') or 0),int(m.get('spend_minor') or 0),int(m.get('leads') or 0),int(m.get('bookings') or 0),int(m.get('revenue_minor') or 0),str(m.get('currency') or 'MXN'))
+        core.experiment_snapshot(job['campaign_id'],30)
     return str(result.get('id') or result.get('provider_ref') or result.get('campaign_id') or '')[:191]
 
 def once()->bool:

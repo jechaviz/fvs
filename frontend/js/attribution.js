@@ -9,7 +9,9 @@
   const campaign={
     utm_source:(qs.get('utm_source')||'').slice(0,120),utm_medium:(qs.get('utm_medium')||'').slice(0,120),
     utm_campaign:(qs.get('utm_campaign')||'').slice(0,160),utm_content:(qs.get('utm_content')||'').slice(0,160),
-    channel:(qs.get('utm_source')||'').slice(0,32),referrer:(document.referrer||'').slice(0,1500)
+    channel:(qs.get('utm_source')||'').slice(0,32),referrer:(document.referrer||'').slice(0,1500),
+    campaign_id:/^[0-9a-fA-F-]{36}$/.test(qs.get('campaign_id')||'')?qs.get('campaign_id'):'',
+    creative_id:/^[0-9a-fA-F-]{36}$/.test(qs.get('creative_id')||'')?qs.get('creative_id'):''
   };
   async function track(event_type,extra={}){
     const body={visitor_id:visitor,session_id:session,event_type,...campaign,...extra};

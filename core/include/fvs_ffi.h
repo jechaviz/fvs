@@ -60,6 +60,8 @@ int fvs_marketing_job_nack(fvs_ctx*,const char*,const char*,const char*,const ch
 int fvs_marketing_metric_upsert(fvs_ctx*,const char*,const char*,const char*,unsigned long long,unsigned long long,long long,unsigned long long,unsigned long long,long long,const char*);
 int fvs_marketing_attribution_record(fvs_ctx*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,long long,const char*,const char*,const char*,const char*,const char*,const char*);
 int fvs_marketing_dashboard(fvs_ctx*,unsigned int,char*,size_t);
+int fvs_experiment_snapshot(fvs_ctx*,const char*,unsigned int,char*,size_t);
+int fvs_experiment_dashboard(fvs_ctx*,unsigned int,char*,size_t);
 const char *fvs_search_ranking_version(void);
 int fvs_search_eval_record(fvs_ctx*,const char*,const char*,unsigned int,unsigned int,unsigned int,unsigned int,char*,size_t);
 int fvs_search_quality_dashboard(fvs_ctx*,unsigned int,char*,size_t);

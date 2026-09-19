@@ -378,6 +378,12 @@ FVS_API int fvs_payment_recovery_get(fvs_ctx *ctx,const char *attempt_id,
 FVS_API int fvs_payment_recovery_dashboard(fvs_ctx *ctx,unsigned int days,
                                            char *out_json,size_t out_size);
 
+/* Evidence-only experiment science: no automatic winner selection. */
+FVS_API int fvs_experiment_snapshot(fvs_ctx *ctx,const char *campaign_id,unsigned int days,
+                                    char *out_json,size_t out_size);
+FVS_API int fvs_experiment_dashboard(fvs_ctx *ctx,unsigned int days,
+                                     char *out_json,size_t out_size);
+
 /* Versioned search-science evidence and online quality telemetry. */
 FVS_API const char *fvs_search_ranking_version(void);
 FVS_API int fvs_search_eval_record(fvs_ctx *ctx,const char *ranking_version,
