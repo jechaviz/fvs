@@ -11,6 +11,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   package:
     runs-on: ubuntu-latest
@@ -26,6 +29,21 @@ jobs:
           else
             echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
           fi
+      - name: Verify committed release manifest
+        run: make manifest-verify
+      - name: Verify release version binding
+        env:
+          FVS_RELEASE_VERSION: "${{ steps.version.outputs.value }}"
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, re, sys
+          expected=os.environ["FVS_RELEASE_VERSION"]
+          src=pathlib.Path("core/src/core.c").read_text(encoding="utf-8")
+          m=re.search(r'fvs_version\(void\)\s*\{\s*return\s*"([0-9]+\.[0-9]+\.[0-9]+)-c-core"',src)
+          if not m or m.group(1)!=expected:
+              print(f"release version mismatch: requested={expected!r} core={(m.group(1) if m else None)!r}",file=sys.stderr)
+              raise SystemExit(2)
+          PY
       - name: Install native dependencies
         run: |
           sudo apt-get update
@@ -40,3 +58,9 @@ jobs:
           name: FVS-${{ steps.version.outputs.value }}
           path: ../FVS-${{ steps.version.outputs.value }}.zip
           if-no-files-found: error
+      - name: Publish tagged GitHub release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: "${{ github.token }}"
+          VERSION: "${{ steps.version.outputs.value }}"
+        run: gh release create "${GITHUB_REF_NAME}" "../FVS-${VERSION}.zip#FVS-${VERSION}.zip" --verify-tag --generate-notes --title "FVS ${VERSION}"

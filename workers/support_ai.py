@@ -49,7 +49,7 @@ def _call_openai(thread:dict)->tuple[str,str,int,int]:
     if safety_id:
         body['safety_identifier']=safety_id
         body['prompt_cache_key']='support-'+safety_id[:48]
-    req=urllib.request.Request('https://api.openai.com/v1/responses',data=json.dumps(body).encode(),headers={'Authorization':'Bearer '+key,'Content-Type':'application/json','User-Agent':'FVS-support/4.0'},method='POST')
+    req=urllib.request.Request('https://api.openai.com/v1/responses',data=json.dumps(body).encode(),headers={'Authorization':'Bearer '+key,'Content-Type':'application/json','User-Agent':'FVS-support/6.0.0'},method='POST')
     with urllib.request.urlopen(req,timeout=float(os.getenv('FVS_SUPPORT_AI_TIMEOUT','25'))) as r:resp=json.load(r)
     text=_extract_text(resp)
     if not text:raise RuntimeError('empty AI response')

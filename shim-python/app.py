@@ -66,9 +66,9 @@ def _metrics_payload(snap):
     out.extend(("# HELP fvs_ops_degraded Whether the operational snapshot is degraded","# TYPE fvs_ops_degraded gauge",f"fvs_ops_degraded {1 if snap.get('status')!='ok' else 0}"))
     return "\n".join(out)+"\n"
 
-def _text(start,status,text,content_type="text/plain; charset=utf-8",extra=None):
+def _text(start,status,text,content_type="text/plain; charset=utf-8",extra=None,cache="no-store"):
     raw=text.encode("utf-8")
-    headers=[("Content-Type",content_type),("Cache-Control","no-store"),("X-Content-Type-Options","nosniff"),("Content-Length",str(len(raw)))]
+    headers=[("Content-Type",content_type),("Cache-Control",cache),("X-Content-Type-Options","nosniff"),("Content-Length",str(len(raw)))]
     start(f"{status} {HTTPStatus(status).phrase}",headers+(extra or []))
     return [raw]
 
@@ -195,18 +195,24 @@ def application(env,start_response):
             return _json(start_response,code,{**state,"request_id":request_id},[] if code==200 else [("Retry-After","5")])
         if path=="/robots.txt" and method=="GET":
             body=f"User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin.html\nDisallow: /support-agent.html\nSitemap: {PUBLIC_BASE}/sitemap.xml\n"
-            return _text(start_response,200,body,"text/plain; charset=utf-8")
+            return _text(start_response,200,body,"text/plain; charset=utf-8",cache="public,max-age=3600")
         if path=="/sitemap.xml" and method=="GET":
             pages=core.seo_pages_list(50000).get("pages",[])
-            return _text(start_response,200,enterprise.sitemap_xml(pages),"application/xml; charset=utf-8")
+            return _text(start_response,200,enterprise.sitemap_xml(pages),"application/xml; charset=utf-8",cache="public,max-age=300,stale-while-revalidate=3600")
         if path.startswith("/stay/") and method=="GET":
             slug=path[len("/stay/"):].strip("/")
             if not re.fullmatch(r"[a-z0-9-]{1,220}",slug): return _text(start_response,404,"Not found")
             try: page=core.seo_page_get(slug,(qs.get("lang") or ["es-MX"])[0])
             except core.CoreError as e:
-                if e.code==3:return _text(start_response,404,"Not found")
-                raise
-            return _text(start_response,200,enterprise.seo_html(page),"text/html; charset=utf-8",[("Cache-Control","public,max-age=300,stale-while-revalidate=86400")])
+                if e.code!=3: raise
+                try: redirect=core.seo_redirect_get(path)
+                except core.CoreError as redirect_error:
+                    if redirect_error.code==3:return _text(start_response,404,"Not found",cache="public,max-age=60")
+                    raise
+                location=str(redirect.get("target_path") or "/");status=int(redirect.get("status_code") or 301)
+                if status not in {301,302,307,308}:status=301
+                start_response(f"{status} {HTTPStatus(status).phrase}",[("Location",location),("Cache-Control","public,max-age=3600"),("X-Content-Type-Options","nosniff")]);return [b""]
+            return _text(start_response,200,enterprise.seo_html(page),"text/html; charset=utf-8",cache="public,max-age=300,stale-while-revalidate=86400")
         if path=="/api/v1/commerce/home" and method=="GET":
             return _json(start_response,200,{**core.commerce_home(),"request_id":request_id})
         m=re.fullmatch(r"/api/v1/commerce/collections/([A-Za-z0-9_-]{1,120})",path)
@@ -229,10 +235,11 @@ def application(env,start_response):
             body=json.loads(raw.decode("utf-8"));result=core.social_lead_capture(body)
             return _json(start_response,202,{**result,"request_id":request_id})
         if path=="/api/v1/support" and method=="POST":
-            body,_=_read_json(env);tid,secret=core.support_thread_create(str(body.get("email") or ""),str(body.get("subject") or "Ayuda con mi reserva"),str(body.get("cart_id") or ""),str(body.get("order_id") or ""),str(body.get("priority") or "normal"))
+            _require_origin(env);body,_=_read_json(env);tid,secret=core.support_thread_create(str(body.get("email") or ""),str(body.get("subject") or "Ayuda con mi reserva"),str(body.get("cart_id") or ""),str(body.get("order_id") or ""),str(body.get("priority") or "normal"))
             if os.getenv("FVS_SUPPORT_AI_ENABLED","1")!="1": core.support_handoff(tid,"AI support disabled; human handoff")
             return _json(start_response,201,{"thread_id":tid,"status":"open","request_id":request_id},[_set_support_cookie(secret)])
         if path.startswith("/api/v1/support/"):
+            if method=="POST": _require_origin(env)
             thread_id=path.split("/")[4] if len(path.split("/"))>4 else "";secret=_support_secret(env)
             if not secret:return _json(start_response,401,{"error":"support_session_missing","request_id":request_id})
             if method=="GET" and re.fullmatch(r"/api/v1/support/[0-9a-fA-F-]{36}",path):
@@ -241,7 +248,7 @@ def application(env,start_response):
                 body,_=_read_json(env);result=core.support_customer_message(thread_id,secret,str(body.get("body") or ""))
                 return _json(start_response,202,{**result,"request_id":request_id})
         if path=="/api/v1/marketing/event" and method=="POST":
-            body,_=_read_json(env)
+            _require_origin(env);body,_=_read_json(env)
             core.marketing_attribution_record(campaign_id=body.get("campaign_id"),channel=body.get("channel"),creative_id=body.get("creative_id"),visitor_id=body.get("visitor_id"),session_id=body.get("session_id"),order_id=body.get("order_id"),event_type=str(body.get("event_type") or "landing"),value_minor=int(body.get("value_minor") or 0),currency=body.get("currency"),utm_source=body.get("utm_source"),utm_medium=body.get("utm_medium"),utm_campaign=body.get("utm_campaign"),utm_content=body.get("utm_content"),referrer=body.get("referrer"))
             return _json(start_response,202,{"accepted":True,"request_id":request_id})
         if path.startswith("/api/v1/webhooks/") and method=="POST":

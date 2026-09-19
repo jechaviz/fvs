@@ -122,9 +122,11 @@ El gate comprueba liveness/readiness, versión del core, workers, dead-letter, l
 
 ## GitHub Actions
 
-`.github/workflows/ci.yml` ejecuta build, sanitizers, contratos de shims, checks productivos, analizadores, lint e integración MySQL en cada push/PR.
+`.github/workflows/ci.yml` verifica primero que `RELEASE_MANIFEST.json` corresponda al árbol comprometido y después ejecuta build, sanitizers, contratos de shims, checks productivos, analizadores, lint e integración MySQL en cada push/PR. Un manifest obsoleto bloquea CI.
 
-`.github/workflows/release.yml` permite generar un artefacto reproducible manualmente o al crear un tag `v*`. La release no sustituye el gate contra infraestructura real; sólo certifica el árbol de código y crea el paquete.
+`.github/workflows/release.yml` valida que la versión solicitada/tag coincida con la versión del core, genera el artefacto reproducible y, para tags `v*`, publica el ZIP en una GitHub Release. La release no sustituye el gate contra infraestructura real.
+
+Como control de repositorio, proteja `main` y marque **FVS CI / verify** como status check obligatorio. Evite pushes directos en equipos de más de una persona; la automatización de release no sustituye esa política de GitHub.
 
 ## Tareas de recuperación
 

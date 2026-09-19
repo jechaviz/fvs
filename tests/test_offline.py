@@ -60,6 +60,22 @@ def main():
     check('idempotency_key' not in front,'frontend never consumes provider idempotency key')
     app_py=(ROOT/'shim-python/app.py').read_text();app_php=(ROOT/'shim-php/index.php').read_text()
     check('_public_attempt' in app_py and 'publicAttempt' in app_php,'HTTP shims redact internal attempt fields')
+    capture={}
+    app._text(lambda status,headers:capture.update(status=status,headers=headers),200,'ok',cache='public,max-age=60')
+    cache_headers=[v for k,v in capture['headers'] if k.lower()=='cache-control']
+    check(cache_headers==['public,max-age=60'],'python text response emits exactly one requested cache policy')
+    check('seo_redirect_get(path)' in app_py,'python SEO route honors redirect map')
+    check('public,max-age=300,stale-while-revalidate=3600' in app_py,'python sitemap is cacheable')
+    def bad_origin_status(path):
+        from io import BytesIO
+        cap={}
+        env={'PATH_INFO':path,'REQUEST_METHOD':'POST','CONTENT_LENGTH':'2','wsgi.input':BytesIO(b'{}'),'HTTP_ORIGIN':'https://evil.example'}
+        b''.join(app.application(env,lambda status,headers:cap.update(status=status,headers=headers)))
+        return int(cap['status'].split()[0])
+    for route in ['/api/v1/support','/api/v1/support/11111111-1111-4111-8111-111111111111/messages','/api/v1/marketing/event']:
+        check(bad_origin_status(route)==403,f'origin gate enforced before browser mutation: {route}')
+    support_ai_src=(ROOT/'workers/support_ai.py').read_text()
+    check('FVS-support/4.0' not in support_ai_src and 'FVS-support/6.0.0' in support_ai_src,'support AI identifies current release')
     check('fvs_webhook_claim_v2' in (ROOT/'shim-python/core.py').read_text() and 'fvs_webhook_claim_v2' in (ROOT/'shim-php/fvs_ffi.h').read_text(),'webhook fencing v2 enabled')
     migrations='\n'.join(p.read_text() for p in sorted((ROOT/'migrations').glob('*.sql')))
     check('ALTER TABLE webhook_events' in migrations and 'lease_token CHAR(32)' in migrations,'webhook fencing column is migrated')

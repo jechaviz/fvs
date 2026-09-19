@@ -44,6 +44,7 @@ La reactivación de dead-letter queda auditada en `ops_actions`. No se implement
 - **CDN supply-chain:** dependencias pinneadas, pero externas; para mayor criticidad, self-host.
 - **SMTP at-least-once:** caída después de aceptación SMTP y antes del ACK puede duplicar email; use proveedor con idempotencia si se requiere exactly-once práctico.
 - **Nginx rate limit:** es defensa en profundidad. El edge/WAF debe aplicar límites globales y resolver correctamente IP del cliente.
+- **Integridad de rama:** la CI verifica el manifest comprometido, pero `main` debe protegerse en GitHub con el check **FVS CI / verify** obligatorio para impedir bypass por push directo.
 - **Backup confidentiality:** los scripts verifican integridad/restore, pero cifrado y retención deben venir del storage/secret/KMS de la plataforma.
 - **Admin key:** aunque el servidor guarda hash, el raw key sigue siendo bearer credential del operador; protéjalo con secret manager y red privada.
 

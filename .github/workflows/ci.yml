@@ -10,6 +10,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Verify committed release manifest
+        run: make manifest-verify
       - name: Install native dependencies
         run: |
           sudo apt-get update
