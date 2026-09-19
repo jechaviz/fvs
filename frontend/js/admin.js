@@ -21,7 +21,8 @@
       ['ROAS',Number(d.roas||0).toFixed(2)+'×'],['Spend',d.spend_minor],
       ['Búsquedas',f.searches],['Zero results',f.zero_results],['Search → cart',pct(f.search_to_cart)],
       ['Carritos',f.carts],['Checkouts',f.checkouts],['Checkout → booking',pct(f.checkout_to_booking)],
-      ['Fallos pago',f.payment_failures]
+      ['Fallos pago',f.payment_failures],
+      ['Provider errors',d.recovery?.provider_error],['Revisión manual',d.recovery?.manual_review],['Recovery stale',d.recovery?.stale_recoverable]
     ];
     q('mktKpis').replaceChildren(...data.map(([label,value])=>{const box=el('div');box.append(el('small','',label),el('strong','',value??0));return box;}));
   }

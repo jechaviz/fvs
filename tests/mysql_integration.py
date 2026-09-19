@@ -344,5 +344,17 @@ def main():
     check(any(x['currency']=='EUR' for x in funnel['revenue_by_currency']),'EUR booking revenue bucket missing')
     check(sql_value("SELECT COUNT(DISTINCT currency) FROM commerce_events WHERE event_type='booking' AND outcome='confirmed'")>='2','booking telemetry mixed/lost currency dimensions')
 
+    # Payment recovery is explicit, idempotent by attempt, and never performs a payment itself.
+    recovered=core.payment_recovery_get(a['attempt_id'])
+    check(recovered['state']=='resolved' and recovered['retry_count']==0,recovered)
+    reviewed=core.payment_recovery_get(a3['attempt_id'])
+    check(reviewed['state']=='manual_review',reviewed)
+    core.payment_recovery_mark(exp_attempt['attempt_id'],'provider_error','provider_prepare','ProviderError',30)
+    core.payment_recovery_mark(exp_attempt['attempt_id'],'provider_error','provider_prepare','ProviderError',30)
+    retry_case=core.payment_recovery_get(exp_attempt['attempt_id'])
+    check(retry_case['state']=='provider_error' and retry_case['retry_count']==2 and retry_case['next_retry_at'],retry_case)
+    recovery_dash=core.payment_recovery_dashboard(1)
+    check(recovery_dash['provider_error']>=1 and recovery_dash['manual_review']>=1 and recovery_dash['resolved']>=1,recovery_dash)
+
     print('PASS MySQL concurrency + booking + support + growth + commerce/social + SEO + commerce telemetry + production ops')
 if __name__=='__main__':main()

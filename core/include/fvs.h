@@ -369,6 +369,15 @@ FVS_API int fvs_marketing_dashboard(fvs_ctx *ctx,
 
 
 
+
+FVS_API int fvs_payment_recovery_mark(fvs_ctx *ctx,const char *attempt_id,const char *state,
+                                      const char *reason_code,const char *last_error,
+                                      unsigned int retry_after_seconds);
+FVS_API int fvs_payment_recovery_get(fvs_ctx *ctx,const char *attempt_id,
+                                     char *out_json,size_t out_size);
+FVS_API int fvs_payment_recovery_dashboard(fvs_ctx *ctx,unsigned int days,
+                                           char *out_json,size_t out_size);
+
 /* Durable server-side commerce telemetry and funnel economics. */
 FVS_API int fvs_commerce_event_record(fvs_ctx *ctx,
                                       const char *event_key,

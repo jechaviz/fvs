@@ -98,6 +98,20 @@ CREATE TABLE IF NOT EXISTS payment_attempts (
   INDEX ix_attempt_cart_status(cart_id,status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE IF NOT EXISTS payment_recovery_cases (
+  attempt_id CHAR(36) PRIMARY KEY,
+  state ENUM('active','provider_error','manual_review','abandoned','resolved') NOT NULL,
+  reason_code VARCHAR(80) NULL,
+  retry_count INT UNSIGNED NOT NULL DEFAULT 0,
+  next_retry_at DATETIME(6) NULL,
+  last_error VARCHAR(1000) NULL,
+  first_seen_at DATETIME(6) NOT NULL,
+  last_seen_at DATETIME(6) NOT NULL,
+  resolved_at DATETIME(6) NULL,
+  CONSTRAINT fk_payment_recovery_attempt FOREIGN KEY(attempt_id) REFERENCES payment_attempts(id),
+  INDEX ix_payment_recovery_state(state,next_retry_at,last_seen_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE IF NOT EXISTS orders (
   id CHAR(36) PRIMARY KEY,
   cart_id CHAR(36) NOT NULL,

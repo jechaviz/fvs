@@ -179,8 +179,16 @@ def checkout_begin(cid,secret,provider,email,terms,hold=1200):
     attempt_id=result.get("attempt_id") or ""
     outcome="requote" if result.get("status")=="quote_refreshed" else "started"
     _commerce_event_safe(event_key=(f"checkout:{attempt_id}" if attempt_id else ""),event_type="checkout_start",source="server",cart_id=cid,attempt_id=attempt_id,provider=provider,outcome=outcome,value_minor=int(result.get("amount_minor") or result.get("total_minor") or 0),currency=result.get("currency"),reason_code=("quote_refreshed" if outcome=="requote" else ""))
+    if attempt_id: payment_recovery_mark(attempt_id,"active","checkout_started","",0)
     return result
-def checkout_get(cid,secret): return _json_call(lib.fvs_checkout_get,b(cid),b(secret))
+def checkout_get(cid,secret):
+    result=_json_call(lib.fvs_checkout_get,b(cid),b(secret))
+    aid=result.get("attempt_id") or ""
+    if aid:
+        try: result["recovery"]=payment_recovery_get(aid)
+        except CoreError as exc:
+            if exc.code!=3: raise
+    return result
 def checkout_attach(attempt_id,checkout_id=None,payment_id=None,client_secret=None,redirect_url=None):
     c=ctx();rc=lib.fvs_checkout_attach_provider(c,b(attempt_id),b(checkout_id),b(payment_id),b(client_secret),b(redirect_url))
     if rc:_err(c,rc)
@@ -189,8 +197,10 @@ def payment_confirm(attempt_id,provider,payment_id,amount_minor,currency,version
     status=str(result.get("status") or "")
     if status=="confirmed" and result.get("order_id"):
         _commerce_event_safe(event_key=f"booking:{result['order_id']}",event_type="booking",source="provider",attempt_id=attempt_id,order_id=result.get("order_id"),provider=provider,outcome="confirmed",value_minor=int(result.get("total_minor") or amount_minor),currency=result.get("currency") or currency)
+        payment_recovery_mark(attempt_id,"resolved","payment_confirmed","",0)
     elif status=="manual_review":
         _commerce_event_safe(event_key=f"payment:{attempt_id}:manual_review",event_type="payment",source="provider",attempt_id=attempt_id,provider=provider,outcome="manual_review",reason_code="reconciliation")
+        payment_recovery_mark(attempt_id,"manual_review","reconciliation","",0)
     return result
 def webhook_claim(provider,event_id,lease_owner,ttl=120):
     c=ctx();out=ctypes.c_int();token=ctypes.create_string_buffer(33)
@@ -258,6 +268,9 @@ lib.fvs_marketing_job_nack.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctype
 lib.fvs_marketing_metric_upsert.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_ulonglong,ctypes.c_ulonglong,ctypes.c_longlong,ctypes.c_ulonglong,ctypes.c_ulonglong,ctypes.c_longlong,ctypes.c_char_p];lib.fvs_marketing_metric_upsert.restype=ctypes.c_int
 lib.fvs_marketing_attribution_record.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_longlong,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p];lib.fvs_marketing_attribution_record.restype=ctypes.c_int
 lib.fvs_marketing_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_marketing_dashboard.restype=ctypes.c_int
+lib.fvs_payment_recovery_mark.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_uint];lib.fvs_payment_recovery_mark.restype=ctypes.c_int
+lib.fvs_payment_recovery_get.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,size_t];lib.fvs_payment_recovery_get.restype=ctypes.c_int
+lib.fvs_payment_recovery_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_payment_recovery_dashboard.restype=ctypes.c_int
 lib.fvs_commerce_event_record.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_longlong,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_int,ctypes.c_char_p];lib.fvs_commerce_event_record.restype=ctypes.c_int
 lib.fvs_commerce_funnel_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_commerce_funnel_dashboard.restype=ctypes.c_int
 lib.fvs_commerce_home.argtypes=[ctx_p,ctypes.c_char_p,size_t];lib.fvs_commerce_home.restype=ctypes.c_int
@@ -335,6 +348,12 @@ def marketing_metric_upsert(campaign_id,channel,metric_date,impressions,clicks,s
 def marketing_attribution_record(**v):
     c=ctx();rc=lib.fvs_marketing_attribution_record(c,b(v.get('campaign_id') or ''),b(v.get('channel') or ''),b(v.get('creative_id') or ''),b(v.get('visitor_id') or ''),b(v.get('session_id') or ''),b(v.get('order_id') or ''),b(v['event_type']),int(v.get('value_minor') or 0),b(v.get('currency') or ''),b(v.get('utm_source') or ''),b(v.get('utm_medium') or ''),b(v.get('utm_campaign') or ''),b(v.get('utm_content') or ''),b(v.get('referrer') or ''))
     if rc:_err(c,rc)
+def payment_recovery_mark(attempt_id,state,reason_code="",last_error="",retry_after_seconds=0):
+    c=ctx();rc=lib.fvs_payment_recovery_mark(c,b(attempt_id),b(state),b(reason_code),b(last_error),int(retry_after_seconds))
+    if rc:_err(c,rc)
+def payment_recovery_get(attempt_id): return _json_call(lib.fvs_payment_recovery_get,b(attempt_id))
+def payment_recovery_dashboard(days=30): return _json_call(lib.fvs_payment_recovery_dashboard,int(days))
+
 def commerce_event_record(**v):
     metadata=v.get("metadata_json")
     if isinstance(metadata,(dict,list)): metadata=json.dumps(metadata,ensure_ascii=False,separators=(",",":"))
@@ -348,6 +367,8 @@ def marketing_dashboard(days=30):
     result=_json_call(lib.fvs_marketing_dashboard,int(days))
     try: result["funnel"]=commerce_funnel_dashboard(days)
     except Exception: result["funnel"]={"unavailable":True}
+    try: result["recovery"]=payment_recovery_dashboard(days)
+    except Exception: result["recovery"]={"unavailable":True}
     return result
 
 def commerce_home(): return _json_call(lib.fvs_commerce_home)

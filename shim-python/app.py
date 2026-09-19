@@ -8,6 +8,7 @@ import core
 import payments
 import inventory_import
 import enterprise
+import recovery
 
 log=logging.getLogger("fvs")
 logging.basicConfig(level=os.getenv("FVS_LOG_LEVEL","INFO"))
@@ -73,7 +74,7 @@ def _text(start,status,text,content_type="text/plain; charset=utf-8",extra=None,
     return [raw]
 
 def _public_attempt(a):
-    keep=("attempt_id","cart_version","provider","status","requires_confirmation","subtotal_minor","addons_minor","discount_minor","amount_minor","promo_code","source_channel","currency","client_secret","redirect_url","order_id")
+    keep=("attempt_id","cart_version","provider","status","requires_confirmation","subtotal_minor","addons_minor","discount_minor","amount_minor","promo_code","source_channel","currency","client_secret","redirect_url","order_id","recovery")
     return {k:a.get(k) for k in keep if k in a}
 
 def _headers(extra=None):
@@ -119,14 +120,6 @@ def _origin_ok(env):
 
 def _require_origin(env):
     if not _origin_ok(env): raise PermissionError("origin not allowed")
-
-def _provider_prepare(attempt, secret):
-    if attempt["provider"]=="stripe":
-        p=payments.stripe_create_or_resume(attempt)
-    else:
-        p=payments.mp_create_or_resume(attempt,API_BASE+"/api/v1/webhooks/mercadopago",PUBLIC_BASE+"/?checkout=return")
-    core.checkout_attach(attempt["attempt_id"],p.get("checkout_id"),p.get("payment_id"),p.get("client_secret"),p.get("redirect_url"))
-    return _public_attempt(core.checkout_get(attempt["cart_id"],secret))
 
 def _stripe_webhook(env,raw):
     secret=os.environ["STRIPE_WEBHOOK_SECRET"]
@@ -400,14 +393,14 @@ def application(env,start_response):
                 if body.get("terms_accepted") is not True:return _json(start_response,422,{"error":"terms_required","request_id":request_id})
                 attempt=core.checkout_begin(cid,secret,str(body.get("provider","")),str(body.get("email","")),TERMS_VERSION,CHECKOUT_HOLD_SECONDS)
                 if attempt.get("status")=="quote_refreshed":return _json(start_response,200,{**_public_attempt(attempt),"request_id":request_id})
-                try: result=_provider_prepare(attempt,secret)
+                try: result=recovery.provider_prepare(attempt,secret,PUBLIC_BASE,API_BASE,_public_attempt)
                 except payments.ProviderError:
                     log.exception("provider prepare failed attempt=%s",attempt.get("attempt_id"));return _json(start_response,202,{"status":"provider_reconciliation_pending","attempt_id":attempt.get("attempt_id"),"request_id":request_id})
                 return _json(start_response,200,{**result,"request_id":request_id})
             if len(parts)==6 and parts[4]=="checkout" and parts[5]=="status" and method=="GET":
                 attempt=core.checkout_get(cid,secret)
                 if attempt.get("status") in {"creating","pending"}:
-                    try: attempt=_provider_prepare(attempt,secret)
+                    try: attempt=recovery.provider_prepare(attempt,secret,PUBLIC_BASE,API_BASE,_public_attempt)
                     except payments.ProviderError: log.exception("provider resume validation failed attempt=%s",attempt.get("attempt_id"))
                 return _json(start_response,200,{**_public_attempt(attempt),"request_id":request_id})
         return _json(start_response,404,{"error":"not_found","request_id":request_id})
