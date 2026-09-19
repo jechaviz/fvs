@@ -97,3 +97,22 @@ the user's expressed intent. The 0.95 NDCG gate is retained.
 START 2026-09-19
 Scope: sharpen the ambiguous evaluation query to the explicit resort intent
 "Asterion Coral Bay", keep thresholds unchanged, and rerun the complete CI/MySQL gate.
+
+DONE 2026-09-19
+Result: explicit-intent corpus retained the NDCG>=0.95 quality bar; versioned
+search-v1 evidence, corpus SHA, MRR/NDCG@10/Precision@10 and online zero-result
+quality telemetry are now reproducible against the real MySQL ranking path.
+Implementation commits: e28027a1f7dbd591d22c74ba3a111e94ac4c51f7 and
+aeb1a6ef9c6b3cf5f0c2e34a2fc5e3dfb87d8e44.
+Evidence: GitHub Actions 35432956798 SUCCESS end-to-end.
+
+DONE WAVE 3 — Discovery/Search Science
+Result: fixed corpus + versioned ranking evidence + online zero-result telemetry
+are enforced by CI without lowering the measured relevance threshold.
+
+### WAVE 4 — Experiment Science & Attribution Closure
+START 2026-09-19
+Scope: propagate campaign/creative identity into exposure attribution, measure
+variant conversion from unique sessions to authoritative order bookings, compute
+95% Wilson intervals, persist evidence snapshots, and expose operator evidence
+without automatic winner selection.
