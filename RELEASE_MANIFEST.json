@@ -117,11 +117,11 @@
     "core/src/internal.h": "619876ba1d30cba0ebe7b1e8d2c4c21a3c2eb1fdd109c916b0cc31709730d257",
     "core/src/internal.c": "9789628cdb432ac883ee734eabc1a28c1e99d576da0104bb0a525b0797414ae1",
     "core/src/telemetry.c": "132847ac8619870f11e9a6a6e1281bb14daf9e40edf6bf1e645df8d9e4e606ba",
-    "core/src/payment_recovery.c": "2d63e4cbb2183ddc7be3cc87b9e538eeb781253a53dff328421666a2ecd7f512",
+    "core/src/payment_recovery.c": "573dd55aa594a3285416c9fba7a02241997733242d89eb0dd2ad3bcceb5076fd",
     "shim-python/recovery.py": "abcda58c1654bfd3c2dffd30bb1a08428f77a0edf2724031ea96b52cd3c7caa3",
     "shim-php/Recovery.php": "da00a4018aeecf77d28e0de0b395e06b483c2498c880adfcde36ec53b3202230"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "3c4094cb65b9cec92a16a0892bbd2a39cb4bf76d14294096d3e14d74b120507d",
+  "tree_sha256": "49b47d0e33bbba51855a5f07b1e07b0bbc6e1f64588555f5d88732fa2bc0f4b9",
   "version": "6.0.0"
 }
