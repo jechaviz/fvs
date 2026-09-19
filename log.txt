@@ -163,3 +163,13 @@ Scope: close paid-growth decisions with provider spend + authoritative confirmed
 revenue, explicit no-magic optimization rules, idempotent guarded pause/scale-up jobs,
 provider/internal-state reconciliation, and evidence dashboards. No automatic action
 is allowed without configured sample/spend/ROAS guardrails.
+
+Checkpoint WAVE 6 — compile gate
+GitHub Actions 35434515377 passed manifest, architecture and supply-chain gates,
+then stopped in the release build because -Werror correctly rejected misleading
+indentation in growth_loop.c. No MySQL or runtime evidence was accepted from that run.
+
+#### WAVE 6.1 — Restore warning-clean growth module
+START 2026-09-19
+Scope: make the dashboard loop unambiguous under -Werror, preserve all closed-loop
+economics/guardrails unchanged, and rerun the complete CI/MySQL gate.

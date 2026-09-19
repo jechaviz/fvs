@@ -328,7 +328,8 @@ int fvs_growth_loop_dashboard(fvs_ctx *ctx,unsigned int days,char *out,size_t ou
     if(rc!=FVS_OK)return rc;
     int first=1;
     while((row=mysql_fetch_row(res))!=NULL){
-        if(!first)fvs_i_json_puts(&w,",");first=0;
+        if(!first){fvs_i_json_puts(&w,",");}
+        first=0;
         fvs_i_json_puts(&w,"{\"decision_key\":");fvs_i_json_string(&w,row[0]);
         fvs_i_json_puts(&w,",\"campaign_id\":");fvs_i_json_string(&w,row[1]);
         fvs_i_json_puts(&w,",\"channel\":");fvs_i_json_string(&w,row[2]);
