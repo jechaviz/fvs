@@ -6,7 +6,7 @@ PORT="${FVS_TEST_MYSQL_PORT:-33306}"
 READY_DIR=$(mktemp -d)
 cleanup(){ docker rm -f "$NAME" >/dev/null 2>&1 || true; rm -rf "$READY_DIR"; }
 trap cleanup EXIT INT TERM
-docker run -d --rm --name "$NAME" -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=fvs -e MYSQL_USER=fvs -e MYSQL_PASSWORD=fvs -p "$PORT:3306" mysql:8.4.11 --default-time-zone=+00:00 --transaction-isolation=READ-COMMITTED >/dev/null
+docker run -d --rm --name "$NAME" -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=fvs -e MYSQL_USER=fvs -e MYSQL_PASSWORD=fvs -p "$PORT:3306" mysql:8.4.11 --default-time-zone=+00:00 --transaction-isolation=READ-COMMITTED --log-bin-trust-function-creators=1 >/dev/null
 export FVS_DB_HOST=127.0.0.1 FVS_DB_PORT="$PORT" FVS_DB_NAME=fvs FVS_DB_USER=fvs FVS_DB_PASSWORD=fvs FVS_TEST_MYSQL_CONTAINER="$NAME"
 ready=0
 for i in $(seq 1 60); do

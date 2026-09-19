@@ -23,6 +23,8 @@ Producción debe separar:
 
 `deploy/mysql/production_grants.sql.example` sirve de punto de partida; ajuste privilegios a su proveedor administrado.
 
+El baseline crea los triggers `trg_inventory_search_bi` y `trg_inventory_search_bu`. La cuenta de migración necesita `TRIGGER`; si binary logging está activo, el servidor debe permitir su creación con `log_bin_trust_function_creators=ON` (o el mecanismo equivalente del proveedor). No otorgue `SUPER` al usuario de migración sólo para resolver este requisito. Los Compose locales y `scripts/test_mysql_docker.sh` ya fijan esta opción.
+
 ## Preflight fail-closed
 
 `deploy/preflight.sh` valida por rol. En `FVS_ENV=production` exige TLS MySQL salvo override explícito, timeouts acotados, secretos fuertes, HTTPS/cookie secure en API, claves de proveedor sólo en API y SMTP TLS sólo en worker. Migrator exige la cuenta DDL dedicada.

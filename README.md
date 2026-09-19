@@ -65,6 +65,8 @@ Para ejecutar la integración con MySQL 8.4 aislado mediante Docker:
 ./scripts/test_mysql_docker.sh
 ```
 
+El baseline usa triggers para mantener el índice de búsqueda. En producción, MySQL con binary logging debe tener `log_bin_trust_function_creators=ON` (o equivalente administrado) y la cuenta `FVS_MIGRATE_DB_*` debe incluir `TRIGGER`; consulta `docs/DEPLOYMENT.md`.
+
 ## Release reproducible
 
 ```bash

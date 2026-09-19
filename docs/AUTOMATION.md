@@ -57,6 +57,14 @@ El migrator sigue usando `schema_migrations`, checksum SHA-256, `dirty` marker y
 
 En producción usa una cuenta DDL separada (`FVS_MIGRATE_DB_*`) y ejecuta el migrator antes de poner tráfico sobre una instancia nueva.
 
+El baseline mantiene `search_text` mediante triggers. Antes de desplegar sobre MySQL con binary logging, verifica:
+
+```sql
+SHOW VARIABLES LIKE 'log_bin_trust_function_creators';
+```
+
+Debe devolver `ON`/`1` salvo que el proveedor ofrezca un mecanismo equivalente. Configúralo como parámetro de servidor/cluster; no compenses dando `SUPER` al usuario DDL. `deploy/mysql/production_grants.sql.example` incluye el privilegio `TRIGGER`. En desarrollo y CI esto ya se configura automáticamente.
+
 ## Manifest y paquete determinista
 
 Generar manifest:

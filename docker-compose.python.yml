@@ -7,7 +7,7 @@ services:
       MYSQL_PASSWORD: ${FVS_DB_PASSWORD:-change-me}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root-change-me}
       TZ: UTC
-    command: ["mysqld","--default-time-zone=+00:00","--transaction-isolation=READ-COMMITTED","--innodb-flush-log-at-trx-commit=1"]
+    command: ["mysqld","--default-time-zone=+00:00","--transaction-isolation=READ-COMMITTED","--innodb-flush-log-at-trx-commit=1","--log-bin-trust-function-creators=1"]
     volumes: ["mysql-data:/var/lib/mysql"]
     healthcheck: {test: ["CMD-SHELL","mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"], interval: 5s, timeout: 3s, retries: 30}
   migrate:
