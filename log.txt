@@ -145,3 +145,21 @@ channels. Production scanner logic was not implicated.
 START 2026-09-19
 Scope: align the recovery fixture to a valid tiktok campaign/creative/cart origin,
 preserve all guarded-abandonment invariants, and rerun the full CI/MySQL gate.
+
+DONE 2026-09-19
+Result: guarded abandonment recovery now detects stale checkout attempts only for
+approved guarded campaigns, excludes reconciliation/manual-review states, schedules
+exactly one recover_abandonment job, and cancels a pending recovery when an authoritative
+order subsequently confirms. Recovery-state metrics are exposed in the admin dashboard.
+Implementation commits: 34fae0965184ac06398256e3261d1a6161dea379 and
+53100889a6ece12b2ec71ea1a64329f5fb819344.
+Evidence: GitHub Actions 35433939777 SUCCESS end-to-end.
+
+DONE WAVE 5 — Guarded Abandonment Recovery
+
+### WAVE 6 — Closed-loop Growth
+START 2026-09-19
+Scope: close paid-growth decisions with provider spend + authoritative confirmed-order
+revenue, explicit no-magic optimization rules, idempotent guarded pause/scale-up jobs,
+provider/internal-state reconciliation, and evidence dashboards. No automatic action
+is allowed without configured sample/spend/ROAS guardrails.

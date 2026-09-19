@@ -108,7 +108,7 @@
     "workers/worker.php": "f9074fb78fc60d2ed2976f9049920258a5d477bbf0940d26be5a79254a4c1ab3",
     "workers/worker.py": "ca668d20ed1727aff10409920eca0bcc3c7e8aca7614314a35d483dec0af3300",
     "SDD.md": "297345589ccd97386d4bc2b387bdf1925e0db5c085a075c1c3e78912f33c6894",
-    "log.txt": "ab48613bb050cb001a053a585af2bbe9cd2a2f6081f08928b8ec609f410be505",
+    "log.txt": "1be06afdfe10a98fcf792649e7cda4d5af2f041b73b0603a237c88e7f192607c",
     "scripts/architecture_gate.py": "2678b6ed83e6449cefccf5972d10a4e21c57c8f82c42efe9ba3fa7d596218a93",
     "scripts/supply_chain_gate.py": "427f869609396fb912a3cc078c276ac4bd951e9c39b0e4dec9a81b319987f03a",
     ".github/CODEOWNERS": "00db9f0d9704d992495ed7cf2f976dd9f461f6e4e535e4f791d7d6536c879db6",
@@ -127,6 +127,6 @@
     "core/src/abandonment.c": "bcd8a93376db7499d8e7e46b6c7add97cbcb4e88f9a3aa755da392aeac7314a4"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "b74065a19e10ef48f6738adb299bd7b111b1ed902e79d4b007793c7f58e74ded",
+  "tree_sha256": "401bd20c9377b7d27d4a4caecab3d4d602932d789d6954498efd22d9f4d5dabc",
   "version": "6.0.0"
 }
