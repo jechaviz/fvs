@@ -57,3 +57,17 @@ Evidence: GitHub Actions 35431621489 SUCCESS, including MySQL 8 integration.
 START 2026-09-19
 Scope: explicit payment-loss taxonomy, recoverable provider failures, retry state,
 manual-review visibility and recovery metrics without weakening payment binding.
+
+DONE 2026-09-19
+Result: payment_recovery_cases adds explicit active/provider_error/manual_review/
+abandoned/resolved state, retry counters/timestamps, provider-error capture and
+recovery dashboard; provider preparation moved out of HTTP hotspots.
+Implementation commits: 68f2f4cffc69d6057ae6140f772076260f02a000 and
+5765c4514423a0ecfae4f60864a000127b604636.
+Evidence: GitHub Actions 35431974764 SUCCESS after CI caught and drove correction
+of compiler-warning formatting; MySQL recovery transition tests passed.
+
+### WAVE 3 — Discovery/Search Science
+START 2026-09-19
+Scope: reproducible relevance metrics, fixed evaluation corpus, online zero-result
+quality telemetry and versioned ranking evidence.
