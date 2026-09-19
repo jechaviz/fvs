@@ -26,3 +26,11 @@ FVS EXECUTION LOG
 - Added CODEOWNERS/checklist policy for sensitive paths.
 - Added a funnel observability contract for search → cart → checkout → booking.
 - Pending in this commit: execute full CI after atomic tree + manifest update.
+
+2026-09-19 — Supply-chain follow-up
+- GitHub Actions run 35430707828 completed SUCCESS for commit 444a0f58e480e8bcf325398a40d58e3319d14e55.
+- The successful run emitted a runner warning because the pinned checkout v4 action still targeted Node 20.
+- Verified from upstream action.yml that actions/checkout v6 and actions/upload-artifact v6 target Node 24.
+- Re-pinned checkout and upload-artifact to the current v6 immutable SHAs.
+- Expanded the supply-chain gate to inspect both step-level actions and job-level reusable workflows.
+- Added a fixture test proving floating tags/branches are rejected while SHA-pinned actions/reusable workflows pass.

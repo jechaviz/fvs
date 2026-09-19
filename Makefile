@@ -55,6 +55,7 @@ test-prod-static:
 	sh tests/test_release_manifest.sh
 	sh tests/test_release_gate.sh
 	sh tests/test_package_release.sh
+	sh tests/test_supply_chain_gate.sh
 	@set +e; FVS_ENV=production sh deploy/preflight.sh api true >/tmp/fvs-preflight-test.log 2>&1; rc=$$?; set -e; \
 		test $$rc -eq 78 || { cat /tmp/fvs-preflight-test.log; echo "expected production preflight rc=78, got $$rc" >&2; exit 1; }
 	python3 -m py_compile deploy/gunicorn.conf.py scripts/load_smoke.py scripts/release_gate.py scripts/verify_backup.py scripts/admin_key_hash.py scripts/release_manifest.py scripts/package_release.py scripts/architecture_gate.py scripts/supply_chain_gate.py

@@ -1,12 +1,12 @@
 {
   "algorithm": "sha256",
-  "file_count": 111,
+  "file_count": 112,
   "files": {
     ".env.example": "2d737be18802e75103b36447d1e6d277098a7d386b325c09a14d5b2abfeffc21",
-    ".github/workflows/ci.yml": "f773462fab36b85f8b25b62f96920c6dc316e6bad6aace2438f25e559b6f1403",
-    ".github/workflows/release.yml": "5ba164d38b88e8bffef7db786fc64c52a08bbbf338b629df78715a063f5cd04c",
+    ".github/workflows/ci.yml": "e80ee0a75b470569141a8b5e81107721af07fe5be8cdad5669bcb1c463a4174c",
+    ".github/workflows/release.yml": "37bb145b2594e8fd2c81d096b0ea692c206b71f68babc941f2d8a1be946154bc",
     ".gitignore": "ff16106ca7d4d018d9153a4251579330c0068d8da9609a7ce2779563aeb1280c",
-    "Makefile": "2c353a7c3a7635388924b4c134f560d1f64fee0392f8656935574d9975433e63",
+    "Makefile": "23b3d8093e82bb247f1c5c44cc965e9b305b2995f174b85e901a0d599ac550d8",
     "README.md": "db3d14f8845c4a163a7aedc6fc24e618bbd56c775a485fb4a03cfdbe96f296cd",
     "core/CMakeLists.txt": "8ce8cdf18c37b5ee9a280e34ea48f4617784bc0619a8c1c85530c7f856d9c439",
     "core/CMakePresets.json": "801f6b09e4db8fcc77762f83e8caf3110c6fcc6c076fe7a4e3ad7c02b52fc583",
@@ -108,13 +108,14 @@
     "workers/worker.php": "f9074fb78fc60d2ed2976f9049920258a5d477bbf0940d26be5a79254a4c1ab3",
     "workers/worker.py": "ca668d20ed1727aff10409920eca0bcc3c7e8aca7614314a35d483dec0af3300",
     "SDD.md": "297345589ccd97386d4bc2b387bdf1925e0db5c085a075c1c3e78912f33c6894",
-    "log.txt": "8ef72d7d76c095d9cf426ff93d1af6a1cebfae2f160666afbc08511fcb9658e2",
+    "log.txt": "6349ad917deac1b7813cd10524d0b7855c7c03f5290005f40ad32d819700a7a5",
     "scripts/architecture_gate.py": "2678b6ed83e6449cefccf5972d10a4e21c57c8f82c42efe9ba3fa7d596218a93",
-    "scripts/supply_chain_gate.py": "55e36ad15ae334ca73afc732efffd2a7d482c135b0497b4865aebdcac04c9dd7",
+    "scripts/supply_chain_gate.py": "427f869609396fb912a3cc078c276ac4bd951e9c39b0e4dec9a81b319987f03a",
     ".github/CODEOWNERS": "00db9f0d9704d992495ed7cf2f976dd9f461f6e4e535e4f791d7d6536c879db6",
-    ".github/pull_request_template.md": "dd033ab1b587fe936133ad20a761ab44d184a25809d376e2a0035442654cb8ff"
+    ".github/pull_request_template.md": "dd033ab1b587fe936133ad20a761ab44d184a25809d376e2a0035442654cb8ff",
+    "tests/test_supply_chain_gate.sh": "ec73d798edbe132ad425fa5296a4e2fc739cf2a453259703421c5401f3c367b0"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "40fe83ed3fb7896ca06dec8d9185876c880cea38648da62181aad2977290e2c2",
+  "tree_sha256": "8f7b1e53878ef5facfe1ab243265c5aa8b3735f84dd40356ecf7885b9906cae4",
   "version": "6.0.0"
 }
