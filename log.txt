@@ -233,3 +233,24 @@ START 2026-09-19
 Scope: move shortMoney into ui-runtime.js, keep the stronger extraction contract,
 lower the App.vue ratchet again to the measured post-extraction size, and rerun
 the complete CI/MySQL gate.
+
+DONE WAVE 7.1 — Complete pure-formatting extraction
+Result: shortMoney joined the browser UI helper runtime rather than weakening the
+extraction contract. App.vue is now 291 lines / 58106 bytes versus the original
+300 / 60915 baseline, while ui-runtime.js owns reusable formatting/state helpers.
+Implementation commits: fa8d47988c7bccadc8fa4453ff7c858b46645208 and
+4ccb667700336b9ff6e1ed3020fca964d039935a.
+Evidence: GitHub Actions 35435839671 SUCCESS end-to-end.
+
+DONE WAVE 7 — Hotspot Debt Ratchet
+Result: architecture baselines now lock in the reductions achieved across core.c,
+App.vue and both HTTP shims; Vue 3 CDN + SFC + UnoCSS runtime remains unchanged
+and no Node runtime/build dependency was introduced.
+
+========================================================================
+ROADMAP WAVES 1–7 COMPLETE — 2026-09-19
+Final state: money telemetry, payment recovery, reproducible search science,
+experiment evidence, guarded abandonment recovery, closed-loop growth and hotspot
+debt ratchets are all enforced by the same manifest/architecture/supply-chain/
+sanitizer/static/MySQL CI path.
+========================================================================
