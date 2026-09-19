@@ -122,9 +122,9 @@
     "shim-php/Recovery.php": "da00a4018aeecf77d28e0de0b395e06b483c2498c880adfcde36ec53b3202230",
     "core/src/search_science.c": "f91b44885dc45b1e7adc502427e332947b784c07fe256a86924888f6100b9e84",
     "scripts/search_eval.py": "7bcd0e0f2d136569d3e7bfe6b1e9c37df7a96bfb96e274554edfcde405a35edd",
-    "tests/fixtures/search_eval_v1.json": "67d8a965b94f40baebba425151cfcb8099a17f10206f3a001b572ab6979e8ed4"
+    "tests/fixtures/search_eval_v1.json": "d081fabed8d738986b2ea1e0fe14e98d8359a5a2a138c91c8d1e137e74e2a491"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "08d7562091f52cc45a22c6ed5749fa878c320e1494d1925d48e7f3d5304b6efa",
+  "tree_sha256": "697ef97114bba5790dac8e455fa1f67ec4656eeebf4d6bca4541589a378453ff",
   "version": "6.0.0"
 }
