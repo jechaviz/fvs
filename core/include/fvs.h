@@ -378,6 +378,12 @@ FVS_API int fvs_payment_recovery_get(fvs_ctx *ctx,const char *attempt_id,
 FVS_API int fvs_payment_recovery_dashboard(fvs_ctx *ctx,unsigned int days,
                                            char *out_json,size_t out_size);
 
+/* Guarded checkout-abandonment recovery queue. */
+FVS_API int fvs_abandonment_scan(fvs_ctx *ctx,unsigned int idle_seconds,unsigned int limit,
+                                 char *out_json,size_t out_size);
+FVS_API int fvs_abandonment_dashboard(fvs_ctx *ctx,unsigned int days,
+                                      char *out_json,size_t out_size);
+
 /* Evidence-only experiment science: no automatic winner selection. */
 FVS_API int fvs_experiment_snapshot(fvs_ctx *ctx,const char *campaign_id,unsigned int days,
                                     char *out_json,size_t out_size);

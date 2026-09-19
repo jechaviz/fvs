@@ -513,6 +513,28 @@ CREATE TABLE IF NOT EXISTS commerce_events (
   INDEX ix_commerce_event_currency(currency,event_type,created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE IF NOT EXISTS commerce_abandonment_cases (
+  attempt_id CHAR(36) PRIMARY KEY,
+  cart_id CHAR(36) NOT NULL,
+  campaign_id CHAR(36) NOT NULL,
+  creative_id CHAR(36) NULL,
+  channel VARCHAR(32) NOT NULL,
+  state ENUM('detected','scheduled','converted','suppressed') NOT NULL,
+  reason_code VARCHAR(80) NOT NULL,
+  job_id CHAR(36) NULL,
+  detected_at DATETIME(6) NOT NULL,
+  scheduled_at DATETIME(6) NULL,
+  converted_at DATETIME(6) NULL,
+  updated_at DATETIME(6) NOT NULL,
+  CONSTRAINT fk_abandonment_attempt FOREIGN KEY(attempt_id) REFERENCES payment_attempts(id) ON DELETE CASCADE,
+  CONSTRAINT fk_abandonment_cart FOREIGN KEY(cart_id) REFERENCES carts(id) ON DELETE CASCADE,
+  CONSTRAINT fk_abandonment_campaign FOREIGN KEY(campaign_id) REFERENCES marketing_campaigns(id) ON DELETE CASCADE,
+  CONSTRAINT fk_abandonment_creative FOREIGN KEY(creative_id) REFERENCES marketing_creatives(id) ON DELETE SET NULL,
+  CONSTRAINT fk_abandonment_job FOREIGN KEY(job_id) REFERENCES marketing_jobs(id) ON DELETE SET NULL,
+  INDEX ix_abandonment_state(state,detected_at),
+  INDEX ix_abandonment_campaign(campaign_id,state,detected_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE IF NOT EXISTS marketing_experiment_evidence (
   id CHAR(36) PRIMARY KEY,
   snapshot_id CHAR(36) NOT NULL,

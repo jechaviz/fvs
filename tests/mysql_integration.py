@@ -299,6 +299,33 @@ def main():
     check(0.0<=variants['A']['wilson95'][0]<=variants['A']['conversion']<=variants['A']['wilson95'][1]<=1.0,variants['A'])
     experiment_dash=core.experiment_dashboard(730)
     check(experiment_dash['automatic_winner_selection'] is False and any(x['snapshot_id']==evidence['snapshot_id'] for x in experiment_dash['evidence']),experiment_dash)
+
+    # Guarded abandonment recovery: exactly one job, never reconciliation/manual-review, cancel if booking converts.
+    ab_campaign=core.marketing_campaign_create('Abandonment '+tag,'bookings','guarded',0,0,'MXN','abandon-'+tag,'itest-admin')
+    ab_campaign_id=ab_campaign['campaign_id'];core.marketing_campaign_approve(ab_campaign_id,'itest-approver')
+    ab_creative=core.marketing_creative_add(ab_campaign_id,'webhook','RECOVER','Completa tu reserva','Tu checkout sigue disponible','Continuar','https://example.test/recover','',False,'itest-admin')
+    ab_creative_id=ab_creative['creative_id'];core.marketing_creative_approve(ab_creative_id,'itest-approver')
+    ab_tag=uuid.uuid4().hex[:8];ab_unit='AB-'+ab_tag
+    ab_row={'source_ref':'abandon:'+ab_tag,'resort':'Abandonment Resort','unit_code':ab_unit,'unit_name':'Recovery Suite','city':'Queretaro','country':'MX','check_in':'2028-01-10','check_out':'2028-01-17','max_guests':4,'price_minor':1100000,'currency':'MXN','active':True}
+    core.inventory_upsert(ab_row);ab_slot=next(x['id'] for x in core.inventory_search('2028-01-01','2028-01-31',2)['items'] if x['unit_code']==ab_unit)
+    ab_cid,ab_sec=core.cart_create();core.cart_add(ab_cid,ab_sec,ab_slot,2,900);core.cart_set_origin(ab_cid,ab_sec,channel='webhook',campaign_id=ab_campaign_id,creative_id=ab_creative_id)
+    ab_attempt=core.checkout_begin(ab_cid,ab_sec,'stripe','abandon@example.com','itest-v1',1200)
+    sql_exec(f"UPDATE payment_attempts SET updated_at=TIMESTAMPADD(HOUR,-2,UTC_TIMESTAMP()) WHERE id='{ab_attempt['attempt_id']}'")
+    scan1=core.abandonment_scan(1800,50)
+    check(scan1['newly_detected']>=1 and scan1['newly_scheduled']>=1,scan1)
+    ab_job=sql_value(f"SELECT job_id FROM commerce_abandonment_cases WHERE attempt_id='{ab_attempt['attempt_id']}'")
+    check(len(ab_job)==36,'abandonment recovery job missing')
+    check(sql_value(f"SELECT action FROM marketing_jobs WHERE id='{ab_job}'")=='recover_abandonment','wrong abandonment action')
+    scan2=core.abandonment_scan(1800,50)
+    check(scan2['newly_scheduled']==0 and sql_value(f"SELECT COUNT(*) FROM marketing_jobs WHERE id='{ab_job}'")=='1','abandonment job was duplicated')
+    ab_pi='pi_ab_'+tag;core.checkout_attach(ab_attempt['attempt_id'],ab_pi,ab_pi,ab_pi+'_secret',None)
+    ab_order=core.payment_confirm(ab_attempt['attempt_id'],'stripe',ab_pi,ab_attempt['amount_minor'],ab_attempt['currency'],ab_attempt['cart_version'])
+    check(ab_order['status']=='confirmed',ab_order)
+    core.abandonment_scan(1800,50)
+    check(sql_value(f"SELECT state FROM commerce_abandonment_cases WHERE attempt_id='{ab_attempt['attempt_id']}'")=='converted','abandonment case not converted after booking')
+    check(sql_value(f"SELECT status FROM marketing_jobs WHERE id='{ab_job}'")=='cancelled','pending abandonment recovery was not cancelled after booking')
+    ab_dash=core.abandonment_dashboard(730);check(ab_dash['converted']>=1,ab_dash)
+
     buyer_points=int(sql_value("SELECT points_balance FROM commerce_loyalty_accounts WHERE email_hash=UNHEX(SHA2('social-itest@example.com',256))"));check(buyer_points==156,f'buyer loyalty mismatch: {buyer_points}')
 
     # Social attribution is multi-currency safe: revenue is bucketed by currency instead of mixed in the link row.

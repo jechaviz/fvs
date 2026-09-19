@@ -24,7 +24,8 @@
       ['Fallos pago',f.payment_failures],
       ['Provider errors',d.recovery?.provider_error],['Revisión manual',d.recovery?.manual_review],['Recovery stale',d.recovery?.stale_recoverable],
       ['Search zero-rate',pct(d.search_quality?.zero_result_rate)],['MRR',Number(d.search_quality?.last_eval?.mrr||0).toFixed(3)],['NDCG@10',Number(d.search_quality?.last_eval?.ndcg10||0).toFixed(3)],
-      ['Experiment evidence',Array.isArray(d.experiments?.evidence)?d.experiments.evidence.length:0]
+      ['Experiment evidence',Array.isArray(d.experiments?.evidence)?d.experiments.evidence.length:0],
+      ['Abandonment queued',d.abandonment?.scheduled],['Abandonment converted',d.abandonment?.converted]
     ];
     q('mktKpis').replaceChildren(...data.map(([label,value])=>{const box=el('div');box.append(el('small','',label),el('strong','',value??0));return box;}));
   }

@@ -77,8 +77,10 @@ if __name__=='__main__':
     while not STOP:
         now=time.monotonic()
         if now>=next_hb:
-            try:core.worker_heartbeat('marketing',instance)
-            except Exception as e:print(f"marketing heartbeat error {type(e).__name__}",file=sys.stderr)
+            try:
+                core.worker_heartbeat('marketing',instance)
+                core.abandonment_scan(int(os.getenv('FVS_ABANDONMENT_IDLE_SECONDS','1800')),int(os.getenv('FVS_ABANDONMENT_SCAN_LIMIT','50')))
+            except Exception as e:print(f"marketing heartbeat/scanner error {type(e).__name__}",file=sys.stderr)
             next_hb=now+heartbeat
         if not once():time.sleep(idle)
     try:core.worker_goodbye('marketing',instance)
