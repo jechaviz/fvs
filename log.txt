@@ -85,3 +85,15 @@ growing core.c or the HTTP hotspots.
 START 2026-09-19
 Scope: persist corpus SHA + ranking metrics, centralize ranking_version in the C
 core, expose online zero-result/ranking dashboards, and validate against MySQL 8.
+
+Checkpoint WAVE 3.2 — CI evidence
+GitHub Actions 35432799200 reached MySQL evaluation with MRR=1.000000,
+NDCG@10=0.944664 and Precision@10=0.133333. The failure was intentionally
+kept: the broad "Asterion" query gave two prefix-equivalent resorts different
+human grades, so price tie-breaking contradicted the corpus label rather than
+the user's expressed intent. The 0.95 NDCG gate is retained.
+
+#### WAVE 3.2.1 — Correct corpus intent, not the quality bar
+START 2026-09-19
+Scope: sharpen the ambiguous evaluation query to the explicit resort intent
+"Asterion Coral Bay", keep thresholds unchanged, and rerun the complete CI/MySQL gate.
