@@ -51,7 +51,7 @@
     "docs/runbooks/INCIDENT_PAYMENTS.md": "839304aa6a94ed091312b2072ad632498b579ada4b08fa298b9f09455fe6786c",
     "docs/runbooks/SOCIAL_COMMERCE.md": "ed92254b19f4f3907909bb3cbee2916a01bf8025578ae9fd364319db43b3499c",
     "frontend/admin.html": "ff30fdc5e8eb2816cd879e0c3dfdef1d45c9fc8289278336257c5ff6413d0507",
-    "frontend/components/App.vue": "0f0d46bba09e8bb1ede6773b52fd904ce5817fad903415870bb49c845becbbab",
+    "frontend/components/App.vue": "c607ba81bffe10d98f918f0a6e2a352ca82737aa3f2d1957b15ce1b1cff4e6af",
     "frontend/css/base.css": "9c08caf95a4e888b71295306b28026fa9285372f64dc2940725f629502f209ee",
     "frontend/index.html": "bc626586258abe6ac6d41f1579412ba055b87d2c2dd3c37ce03c70e3c21d851c",
     "frontend/js/admin.js": "ecbd132f7f7c2868a296ac9f24864968bf6f1dcd2679fb5a6c563b4533e78280",
@@ -107,9 +107,9 @@
     "workers/support_ai.py": "a958cef9cd9435a3f6b312f9ebcd4e7c325086ad49689e243b3f7c21e2cdd7f6",
     "workers/worker.php": "f9074fb78fc60d2ed2976f9049920258a5d477bbf0940d26be5a79254a4c1ab3",
     "workers/worker.py": "ca668d20ed1727aff10409920eca0bcc3c7e8aca7614314a35d483dec0af3300",
-    "SDD.md": "849763bf3af0af44c6e9d6fa8c09e1f5a0939f544248c23f3265c41a0068d080",
+    "SDD.md": "93b665db0c2a4e58211f087c2c21740cc608ab122072ec79628e538f20fe63e9",
     "log.txt": "99bf122b923c2e85656d3a3fa0c315ef11cd2c0f28288546966de0c133446116",
-    "scripts/architecture_gate.py": "7fe32d75ae425e3bea0ee11bcd56816f68f771854b8f27f3120da67700bda1a6",
+    "scripts/architecture_gate.py": "7ffe56d208ece76b33aeb12ff65c31e5a744302444c9b5a13cf6c981a02220dd",
     "scripts/supply_chain_gate.py": "427f869609396fb912a3cc078c276ac4bd951e9c39b0e4dec9a81b319987f03a",
     ".github/CODEOWNERS": "00db9f0d9704d992495ed7cf2f976dd9f461f6e4e535e4f791d7d6536c879db6",
     ".github/pull_request_template.md": "dd033ab1b587fe936133ad20a761ab44d184a25809d376e2a0035442654cb8ff",
@@ -127,9 +127,9 @@
     "core/src/abandonment.c": "bcd8a93376db7499d8e7e46b6c7add97cbcb4e88f9a3aa755da392aeac7314a4",
     "core/src/growth_loop.c": "af74800cb83ed992d26cab28363b15c2ac19188ab37bdf5a4830ec9258510f74",
     "core/src/marketing_runtime.c": "eedba327e3d9d784bad17a18e4c7b4e1d3bab6a0d97d198f8ec6056e4ef7679d",
-    "frontend/js/ui-runtime.js": "4bc7946f6d4d6ac58d129ed4f6734dc90bdf8e1195d513b821758372bd04eeca"
+    "frontend/js/ui-runtime.js": "501a0f0d977a50e086aaea3587b31deafcc915e01f6c3991fd66f14c6702790d"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "e95ef94f5484fcd78240effeb0e5616d867d744df451c74f1536641d2de8e5d7",
+  "tree_sha256": "cba12f782f54001258c8b1f2e7f8971670dcd450f52509fb1588bdbf45505e2f",
   "version": "6.0.0"
 }

@@ -7,6 +7,7 @@
   const savedView=()=>{const v=localStorage.getItem('fvs_view');return ['list','split','map'].includes(v)?v:'split'};
   const methods={
     money(v,c){try{return new Intl.NumberFormat('es-MX',{style:'currency',currency:c||'MXN',maximumFractionDigits:0}).format((Number(v)||0)/100)}catch{return `${(Number(v)||0)/100} ${c}`}},
+    shortMoney(v,c){const n=(Number(v)||0)/100;if(c==='MXN')return n>=1000?`$${Math.round(n/1000)}k`:`$${Math.round(n)}`;return new Intl.NumberFormat('en',{style:'currency',currency:c||'USD',notation:'compact',maximumFractionDigits:0}).format(n)},
     minorToMajor(v){return v?Math.round(Number(v)/100):''},
     fmtDate(s){if(!s)return '';return new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(s+'T00:00:00Z'))},
     fmtDateShort(s){if(!s)return '';return new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(s+'T00:00:00Z'))},

@@ -57,7 +57,7 @@ Los hotspots actuales son:
 | Ruta | Baseline líneas | Baseline bytes | Acción |
 | --- | ---: | ---: | --- |
 | `core/src/core.c` | 2232 | 198806 | No crecer; las waves ya extrajeron runtime/science a módulos C. |
-| `frontend/components/App.vue` | 291 | 58349 | No crecer; helpers puros viven en `frontend/js/ui-runtime.js`. |
+| `frontend/components/App.vue` | 291 | 58106 | No crecer; helpers puros viven en `frontend/js/ui-runtime.js`. |
 | `frontend/css/base.css` | 40 | 46018 | No crecer; separar por responsabilidad cuando se modifique. |
 | `shim-python/app.py` | 417 | 34442 | No crecer; provider recovery ya está extraído. |
 | `shim-php/index.php` | 82 | 24683 | No crecer; mantener paridad con módulos equivalentes. |
