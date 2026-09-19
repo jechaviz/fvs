@@ -18,5 +18,9 @@ if [ "$ready" -ne 1 ]; then
   docker logs "$NAME" >&2 || true
   exit 2
 fi
+# Keep binary logging enabled but explicitly trust trigger/function creators in this
+# ephemeral integration instance. Production config must set the equivalent
+# server/cluster parameter; the migration user should not receive SUPER.
+docker exec "$NAME" mysql -uroot -proot -Nse "SET GLOBAL log_bin_trust_function_creators=1; SELECT @@GLOBAL.log_bin_trust_function_creators" | grep -qx '1'
 "$ROOT/core/build/release/fvs_migrate" "$ROOT/migrations"
 FVS_CORE_LIB="$ROOT/core/build/release/libfvs_core.so" python3 "$ROOT/tests/mysql_integration.py"

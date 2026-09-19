@@ -77,7 +77,7 @@
     "scripts/release_manifest.py": "8a3b38b0c7a14bdab49a601c68ed3efc5f022d8675b89026c4d4a8ba96a54624",
     "scripts/restore_drill.sh": "31ac7207f3922fa6244a8a8d5151a289ab66c08dcaaeba411a0e79cfb9c10c55",
     "scripts/restore_mysql.sh": "84136c02b261f1810abdae7bfc7b4e8f19037e5af4a7377753df0e0dff37b7dc",
-    "scripts/test_mysql_docker.sh": "e6825d369806b53a4e7e0af429112e35d5318e6659a19c2cfc092c404403a827",
+    "scripts/test_mysql_docker.sh": "47939a12567cd3c3aa932c4ce9e05ceb2f38c6d1cba0f06fc4b382c99e3024c2",
     "scripts/verify_backup.py": "c066e0dc4b1d65d78418c28042fcdb16e8c2819a33998b9f07e972927b71e9a3",
     "shim-php/Core.php": "c5999cde11d521862a3b56934240f4839b3048f16ed273655a06060153b75eac",
     "shim-php/Enterprise.php": "9cc0587802bbd19d6021b3c4e49e5a22acba306fda156dc96ddd471792a32bb1",
@@ -110,6 +110,6 @@
     "workers/worker.py": "ca668d20ed1727aff10409920eca0bcc3c7e8aca7614314a35d483dec0af3300"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "c53ebd8645cb2c7d4287ef8acbb27ad9a7867a9df930516de000d451474800a7",
+  "tree_sha256": "ce229762cc2e315862655a10fe524fc1b82430230359bbb46f2015e6b1f8f73b",
   "version": "6.0.0"
 }
