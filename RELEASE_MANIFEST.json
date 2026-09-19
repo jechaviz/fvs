@@ -108,7 +108,7 @@
     "workers/worker.php": "f9074fb78fc60d2ed2976f9049920258a5d477bbf0940d26be5a79254a4c1ab3",
     "workers/worker.py": "ca668d20ed1727aff10409920eca0bcc3c7e8aca7614314a35d483dec0af3300",
     "SDD.md": "297345589ccd97386d4bc2b387bdf1925e0db5c085a075c1c3e78912f33c6894",
-    "log.txt": "fd9f760886ad4550420e4d22587ca41a520c8ba11d24d95abc9c84f8b0ca73d2",
+    "log.txt": "d40565bc5f0682baed25db0d0f2f380e49235a6d411dc834d4884e9ca147cde1",
     "scripts/architecture_gate.py": "2678b6ed83e6449cefccf5972d10a4e21c57c8f82c42efe9ba3fa7d596218a93",
     "scripts/supply_chain_gate.py": "427f869609396fb912a3cc078c276ac4bd951e9c39b0e4dec9a81b319987f03a",
     ".github/CODEOWNERS": "00db9f0d9704d992495ed7cf2f976dd9f461f6e4e535e4f791d7d6536c879db6",
@@ -126,9 +126,9 @@
     "core/src/experiment_science.c": "bafe2341b0830e8233cc079f8d228674714f03e530fa297f813e79ae43befc38",
     "core/src/abandonment.c": "bcd8a93376db7499d8e7e46b6c7add97cbcb4e88f9a3aa755da392aeac7314a4",
     "core/src/growth_loop.c": "af74800cb83ed992d26cab28363b15c2ac19188ab37bdf5a4830ec9258510f74",
-    "core/src/marketing_runtime.c": "2b597d70eb02942c979815d5a9e4f35cd1fd8ad17879ccc7089c60f66f61c338"
+    "core/src/marketing_runtime.c": "97bd9cf0b4972968dcd2df288b9be23654f1f04d916bbd59a1c75c42d6685ac7"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "6115a27db282a6747dbd90c9f2e2c67a333bb0a49dcedec47c1bbc4cb20f045f",
+  "tree_sha256": "61d6727c9802903f865e228ea632fbaba52c1ac8852882e1d577082af44e2263",
   "version": "6.0.0"
 }

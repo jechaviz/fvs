@@ -173,3 +173,14 @@ indentation in growth_loop.c. No MySQL or runtime evidence was accepted from tha
 START 2026-09-19
 Scope: make the dashboard loop unambiguous under -Werror, preserve all closed-loop
 economics/guardrails unchanged, and rerun the complete CI/MySQL gate.
+
+DONE WAVE 6.1 — warning-clean growth module
+Result: release/sanitizer/shim-contract build and static analysis became clean.
+GitHub Actions 35434669230 then reached MySQL and exposed a syntax error in the
+new extracted claimant before closed-loop economics executed.
+
+#### WAVE 6.2 — Claim predicate SQL repair
+START 2026-09-19
+Scope: retain the original proven normal claim predicate, add the managed
+closed_loop_growth update-budget branch as one balanced auditable OR clause,
+and rerun the complete gate without weakening any financial guardrail.
