@@ -464,6 +464,41 @@ CREATE TABLE IF NOT EXISTS marketing_attribution_events (
   INDEX ix_marketing_attr_order(order_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- domain section: commerce_telemetry
+CREATE TABLE IF NOT EXISTS commerce_events (
+  id CHAR(36) PRIMARY KEY,
+  event_key VARCHAR(191) NOT NULL,
+  event_type VARCHAR(48) NOT NULL,
+  source ENUM('server','provider','worker','browser') NOT NULL,
+  visitor_id CHAR(36) NULL,
+  session_id CHAR(36) NULL,
+  cart_id CHAR(36) NULL,
+  attempt_id CHAR(36) NULL,
+  order_id CHAR(36) NULL,
+  slot_id CHAR(36) NULL,
+  campaign_id CHAR(36) NULL,
+  creative_id CHAR(36) NULL,
+  channel VARCHAR(32) NULL,
+  provider VARCHAR(32) NULL,
+  outcome VARCHAR(48) NULL,
+  reason_code VARCHAR(80) NULL,
+  value_minor BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  currency CHAR(3) NULL,
+  query_text VARCHAR(300) NULL,
+  result_count INT UNSIGNED NULL,
+  metadata_json JSON NULL,
+  created_at DATETIME(6) NOT NULL,
+  UNIQUE KEY uq_commerce_event_key(event_key),
+  INDEX ix_commerce_event_type(event_type,created_at),
+  INDEX ix_commerce_event_cart(cart_id,created_at),
+  INDEX ix_commerce_event_attempt(attempt_id,created_at),
+  INDEX ix_commerce_event_order(order_id,created_at),
+  INDEX ix_commerce_event_session(session_id,created_at),
+  INDEX ix_commerce_event_campaign(campaign_id,creative_id,created_at),
+  INDEX ix_commerce_event_query(event_type,result_count,created_at),
+  INDEX ix_commerce_event_currency(currency,event_type,created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- domain section: seo
 CREATE TABLE IF NOT EXISTS seo_pages (
   id CHAR(36) PRIMARY KEY,

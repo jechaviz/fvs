@@ -332,5 +332,17 @@ def main():
     listed=core.seo_pages_list(50000)['pages']
     check(any(x['slug']==destination_slug for x in listed),'destination page missing from sitemap source')
 
-    print('PASS MySQL concurrency + booking + support + growth + commerce/social + SEO + production ops')
+    # Authoritative funnel telemetry is idempotent and keeps money bucketed by currency.
+    telemetry_key='itest:search:'+tag
+    core.commerce_event_record(event_key=telemetry_key,event_type='search',source='server',query_text='no inventory integration query',result_count=0,metadata_json={'ranking_version':'search-v1'})
+    core.commerce_event_record(event_key=telemetry_key,event_type='search',source='server',query_text='no inventory integration query',result_count=0,metadata_json={'ranking_version':'search-v1'})
+    check(sql_value(f"SELECT COUNT(*) FROM commerce_events WHERE event_key='{telemetry_key}'")=='1','commerce telemetry idempotency failed')
+    funnel=core.commerce_funnel_dashboard(1)
+    check(funnel['searches']>=1 and funnel['zero_results']>=1,'funnel search metrics missing')
+    check(funnel['bookings']>=1 and isinstance(funnel['revenue_by_currency'],list),'funnel booking/currency metrics missing')
+    check(any(x['currency']=='MXN' for x in funnel['revenue_by_currency']),'MXN booking revenue bucket missing')
+    check(any(x['currency']=='EUR' for x in funnel['revenue_by_currency']),'EUR booking revenue bucket missing')
+    check(sql_value("SELECT COUNT(DISTINCT currency) FROM commerce_events WHERE event_type='booking' AND outcome='confirmed'")>='2','booking telemetry mixed/lost currency dimensions')
+
+    print('PASS MySQL concurrency + booking + support + growth + commerce/social + SEO + commerce telemetry + production ops')
 if __name__=='__main__':main()

@@ -1,4 +1,5 @@
 #include "fvs.h"
+#include "internal.h"
 
 #include <mysql.h>
 #include <ctype.h>
@@ -9,10 +10,6 @@
 #include <string.h>
 #include <time.h>
 
-struct fvs_ctx {
-    MYSQL *db;
-    char last_error[512];
-};
 
 typedef struct {
     char *buf;

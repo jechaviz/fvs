@@ -368,6 +368,33 @@ FVS_API int fvs_marketing_dashboard(fvs_ctx *ctx,
                                     char *out_json, size_t out_size);
 
 
+
+/* Durable server-side commerce telemetry and funnel economics. */
+FVS_API int fvs_commerce_event_record(fvs_ctx *ctx,
+                                      const char *event_key,
+                                      const char *event_type,
+                                      const char *source,
+                                      const char *visitor_id,
+                                      const char *session_id,
+                                      const char *cart_id,
+                                      const char *attempt_id,
+                                      const char *order_id,
+                                      const char *slot_id,
+                                      const char *campaign_id,
+                                      const char *creative_id,
+                                      const char *channel,
+                                      const char *provider,
+                                      const char *outcome,
+                                      const char *reason_code,
+                                      int64_t value_minor,
+                                      const char *currency,
+                                      const char *query_text,
+                                      int result_count,
+                                      const char *metadata_json);
+FVS_API int fvs_commerce_funnel_dashboard(fvs_ctx *ctx,
+                                          unsigned int days,
+                                          char *out_json, size_t out_size);
+
 /* Commerce Experience 6.x: server-authoritative merchandising and social commerce. */
 FVS_API int fvs_commerce_home(fvs_ctx *ctx, char *out_json, size_t out_size);
 FVS_API int fvs_commerce_collection_get(fvs_ctx *ctx, const char *slug, char *out_json, size_t out_size);

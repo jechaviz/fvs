@@ -15,7 +15,14 @@
   const selected=()=>q('campaignSelect').value;
   function el(tag,className,text){const n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text??'');return n;}
   function renderKpis(d){
-    const data=[['Impresiones',d.impressions],['Clicks',d.clicks],['Leads',d.leads],['Reservas',d.bookings],['ROAS',Number(d.roas||0).toFixed(2)+'×'],['Spend',d.spend_minor]];
+    const f=d.funnel||{},pct=v=>(Number(v||0)*100).toFixed(1)+'%';
+    const data=[
+      ['Impresiones',d.impressions],['Clicks',d.clicks],['Leads',d.leads],['Reservas paid',f.bookings??d.bookings],
+      ['ROAS',Number(d.roas||0).toFixed(2)+'×'],['Spend',d.spend_minor],
+      ['Búsquedas',f.searches],['Zero results',f.zero_results],['Search → cart',pct(f.search_to_cart)],
+      ['Carritos',f.carts],['Checkouts',f.checkouts],['Checkout → booking',pct(f.checkout_to_booking)],
+      ['Fallos pago',f.payment_failures]
+    ];
     q('mktKpis').replaceChildren(...data.map(([label,value])=>{const box=el('div');box.append(el('small','',label),el('strong','',value??0));return box;}));
   }
   async function refreshGrowth(){

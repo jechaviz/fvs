@@ -141,13 +141,16 @@ def inventory_search_v2(filters):
     bbox=filters.get("bbox") or None
     use_bbox=1 if bbox and len(bbox)==4 else 0
     if not use_bbox: bbox=[0.0,0.0,0.0,0.0]
-    return _json_call(lib.fvs_inventory_search_v2,
+    result=_json_call(lib.fvs_inventory_search_v2,
         b(str(filters.get("q") or "")), b(str(filters.get("check_in") or "")), b(str(filters.get("check_out") or "")), int(filters.get("guests") or 2),
         b(str(filters.get("country") or "")), b(str(filters.get("city") or "")), b(str(filters.get("resort") or "")), b(str(filters.get("property_type") or "")),
         b(str(filters.get("season") or "")), b(str(filters.get("booking_mode") or "")), b(str(filters.get("amenities") or "")),
         int(filters.get("min_bedrooms") or 0), float(filters.get("min_bathrooms") or 0), int(filters.get("min_rating_x100") or 0),
         int(filters.get("min_price_minor") or 0), int(filters.get("max_price_minor") or 0),
         float(bbox[0]),float(bbox[1]),float(bbox[2]),float(bbox[3]),use_bbox,b(str(filters.get("sort") or "relevance")),int(filters.get("limit") or 60),int(filters.get("offset") or 0))
+    if int(filters.get("offset") or 0)==0:
+        _commerce_event_safe(event_type="search",source="server",query_text=str(filters.get("q") or "")[:300],result_count=int(result.get("total") or len(result.get("items") or [])),metadata_json={"sort":str(filters.get("sort") or "relevance"),"country":str(filters.get("country") or ""), "city":str(filters.get("city") or ""), "ranking_version":"search-v1"})
+    return result
 def inventory_suggest(query,limit=10): return _json_call(lib.fvs_inventory_suggest,b(query),int(limit))
 def inventory_upsert(row):
     c=ctx();created=ctypes.c_int()
@@ -166,14 +169,29 @@ def cart_create():
     if rc:_err(c,rc)
     return cid.value.decode(),sec.value.decode()
 def cart_get(cid,secret): return _json_call(lib.fvs_cart_get,b(cid),b(secret))
-def cart_add(cid,secret,slot_id,guests,hold=900): return _json_call(lib.fvs_cart_add,b(cid),b(secret),b(slot_id),guests,hold)
+def cart_add(cid,secret,slot_id,guests,hold=900):
+    result=_json_call(lib.fvs_cart_add,b(cid),b(secret),b(slot_id),guests,hold)
+    _commerce_event_safe(event_key=f"cart_add:{cid}:v{result.get('version',0)}:{slot_id}",event_type="cart_add",source="server",cart_id=cid,slot_id=slot_id,channel=result.get("source_channel"),outcome="held",value_minor=int(result.get("total_minor") or 0),currency=result.get("currency"),metadata_json={"guests":int(guests)})
+    return result
 def cart_remove(cid,secret,slot_id): return _json_call(lib.fvs_cart_remove,b(cid),b(secret),b(slot_id))
-def checkout_begin(cid,secret,provider,email,terms,hold=1200): return _json_call(lib.fvs_checkout_begin,b(cid),b(secret),b(provider),b(email),b(terms),hold)
+def checkout_begin(cid,secret,provider,email,terms,hold=1200):
+    result=_json_call(lib.fvs_checkout_begin,b(cid),b(secret),b(provider),b(email),b(terms),hold)
+    attempt_id=result.get("attempt_id") or ""
+    outcome="requote" if result.get("status")=="quote_refreshed" else "started"
+    _commerce_event_safe(event_key=(f"checkout:{attempt_id}" if attempt_id else ""),event_type="checkout_start",source="server",cart_id=cid,attempt_id=attempt_id,provider=provider,outcome=outcome,value_minor=int(result.get("amount_minor") or result.get("total_minor") or 0),currency=result.get("currency"),reason_code=("quote_refreshed" if outcome=="requote" else ""))
+    return result
 def checkout_get(cid,secret): return _json_call(lib.fvs_checkout_get,b(cid),b(secret))
 def checkout_attach(attempt_id,checkout_id=None,payment_id=None,client_secret=None,redirect_url=None):
     c=ctx();rc=lib.fvs_checkout_attach_provider(c,b(attempt_id),b(checkout_id),b(payment_id),b(client_secret),b(redirect_url))
     if rc:_err(c,rc)
-def payment_confirm(attempt_id,provider,payment_id,amount_minor,currency,version): return _json_call(lib.fvs_payment_confirm,b(attempt_id),b(provider),b(payment_id),amount_minor,b(currency),version)
+def payment_confirm(attempt_id,provider,payment_id,amount_minor,currency,version):
+    result=_json_call(lib.fvs_payment_confirm,b(attempt_id),b(provider),b(payment_id),amount_minor,b(currency),version)
+    status=str(result.get("status") or "")
+    if status=="confirmed" and result.get("order_id"):
+        _commerce_event_safe(event_key=f"booking:{result['order_id']}",event_type="booking",source="provider",attempt_id=attempt_id,order_id=result.get("order_id"),provider=provider,outcome="confirmed",value_minor=int(result.get("total_minor") or amount_minor),currency=result.get("currency") or currency)
+    elif status=="manual_review":
+        _commerce_event_safe(event_key=f"payment:{attempt_id}:manual_review",event_type="payment",source="provider",attempt_id=attempt_id,provider=provider,outcome="manual_review",reason_code="reconciliation")
+    return result
 def webhook_claim(provider,event_id,lease_owner,ttl=120):
     c=ctx();out=ctypes.c_int();token=ctypes.create_string_buffer(33)
     rc=lib.fvs_webhook_claim_v2(c,b(provider),b(event_id),b(lease_owner),ttl,token,33,ctypes.byref(out))
@@ -240,6 +258,8 @@ lib.fvs_marketing_job_nack.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctype
 lib.fvs_marketing_metric_upsert.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_ulonglong,ctypes.c_ulonglong,ctypes.c_longlong,ctypes.c_ulonglong,ctypes.c_ulonglong,ctypes.c_longlong,ctypes.c_char_p];lib.fvs_marketing_metric_upsert.restype=ctypes.c_int
 lib.fvs_marketing_attribution_record.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_longlong,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p];lib.fvs_marketing_attribution_record.restype=ctypes.c_int
 lib.fvs_marketing_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_marketing_dashboard.restype=ctypes.c_int
+lib.fvs_commerce_event_record.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_longlong,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_int,ctypes.c_char_p];lib.fvs_commerce_event_record.restype=ctypes.c_int
+lib.fvs_commerce_funnel_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_commerce_funnel_dashboard.restype=ctypes.c_int
 lib.fvs_commerce_home.argtypes=[ctx_p,ctypes.c_char_p,size_t];lib.fvs_commerce_home.restype=ctypes.c_int
 lib.fvs_commerce_collection_get.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,size_t];lib.fvs_commerce_collection_get.restype=ctypes.c_int
 lib.fvs_commerce_recommendations.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_commerce_recommendations.restype=ctypes.c_int
@@ -315,7 +335,20 @@ def marketing_metric_upsert(campaign_id,channel,metric_date,impressions,clicks,s
 def marketing_attribution_record(**v):
     c=ctx();rc=lib.fvs_marketing_attribution_record(c,b(v.get('campaign_id') or ''),b(v.get('channel') or ''),b(v.get('creative_id') or ''),b(v.get('visitor_id') or ''),b(v.get('session_id') or ''),b(v.get('order_id') or ''),b(v['event_type']),int(v.get('value_minor') or 0),b(v.get('currency') or ''),b(v.get('utm_source') or ''),b(v.get('utm_medium') or ''),b(v.get('utm_campaign') or ''),b(v.get('utm_content') or ''),b(v.get('referrer') or ''))
     if rc:_err(c,rc)
-def marketing_dashboard(days=30): return _json_call(lib.fvs_marketing_dashboard,int(days))
+def commerce_event_record(**v):
+    metadata=v.get("metadata_json")
+    if isinstance(metadata,(dict,list)): metadata=json.dumps(metadata,ensure_ascii=False,separators=(",",":"))
+    c=ctx();rc=lib.fvs_commerce_event_record(c,b(v.get("event_key") or ""),b(v["event_type"]),b(v.get("source") or "server"),b(v.get("visitor_id") or ""),b(v.get("session_id") or ""),b(v.get("cart_id") or ""),b(v.get("attempt_id") or ""),b(v.get("order_id") or ""),b(v.get("slot_id") or ""),b(v.get("campaign_id") or ""),b(v.get("creative_id") or ""),b(v.get("channel") or ""),b(v.get("provider") or ""),b(v.get("outcome") or ""),b(v.get("reason_code") or ""),int(v.get("value_minor") or 0),b(v.get("currency") or ""),b(v.get("query_text") or ""),int(v.get("result_count",-1)),b(metadata or ""))
+    if rc:_err(c,rc)
+def _commerce_event_safe(**v):
+    try: commerce_event_record(**v)
+    except Exception: pass
+def commerce_funnel_dashboard(days=30): return _json_call(lib.fvs_commerce_funnel_dashboard,int(days))
+def marketing_dashboard(days=30):
+    result=_json_call(lib.fvs_marketing_dashboard,int(days))
+    try: result["funnel"]=commerce_funnel_dashboard(days)
+    except Exception: result["funnel"]={"unavailable":True}
+    return result
 
 def commerce_home(): return _json_call(lib.fvs_commerce_home)
 def commerce_collection_get(slug): return _json_call(lib.fvs_commerce_collection_get,b(slug))

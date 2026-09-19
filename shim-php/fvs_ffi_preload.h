@@ -61,6 +61,8 @@ int fvs_marketing_job_nack(fvs_ctx*,const char*,const char*,const char*,const ch
 int fvs_marketing_metric_upsert(fvs_ctx*,const char*,const char*,const char*,unsigned long long,unsigned long long,long long,unsigned long long,unsigned long long,long long,const char*);
 int fvs_marketing_attribution_record(fvs_ctx*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,long long,const char*,const char*,const char*,const char*,const char*,const char*);
 int fvs_marketing_dashboard(fvs_ctx*,unsigned int,char*,size_t);
+int fvs_commerce_event_record(fvs_ctx*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,long long,const char*,const char*,int,const char*);
+int fvs_commerce_funnel_dashboard(fvs_ctx*,unsigned int,char*,size_t);
 /* Commerce Experience 6.x */
 int fvs_commerce_home(fvs_ctx*,char*,size_t);
 int fvs_commerce_collection_get(fvs_ctx*,const char*,char*,size_t);
