@@ -116,3 +116,20 @@ Scope: propagate campaign/creative identity into exposure attribution, measure
 variant conversion from unique sessions to authoritative order bookings, compute
 95% Wilson intervals, persist evidence snapshots, and expose operator evidence
 without automatic winner selection.
+
+DONE 2026-09-19
+Result: campaign/creative identity now reaches landing exposure attribution; experiment
+snapshots use unique attributed sessions as exposure denominator and confirmed orders as
+the authoritative booking numerator. Each atomic snapshot persists conversion + Wilson
+95% bounds, attribution-consistency and sample-sufficiency evidence; no automatic winner
+selection is implemented. Python/PHP workers snapshot evidence after metric sync.
+Implementation commit: 104251d072151cacd671116d6fcb7b2f7f277a61.
+Evidence: GitHub Actions 35433249361 SUCCESS end-to-end.
+
+DONE WAVE 4 — Experiment Science & Attribution Closure
+
+### WAVE 5 — Guarded Abandonment Recovery
+START 2026-09-19
+Scope: detect stale checkout attempts without orders, exclude payment reconciliation/manual
+review states, create exactly one guarded recovery job for approved attributed campaigns,
+cancel pending recovery if a booking subsequently converts, and expose recovery-state metrics.
