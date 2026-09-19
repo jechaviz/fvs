@@ -221,3 +221,15 @@ Scope: extract pure browser/UI helpers from App.vue without Node/runtime changes
 lock in all hotspot reductions achieved during Waves 1–6 by lowering architecture
 ratchet baselines to measured current sizes, preserve Vue 3 CDN + SFC behavior,
 and rerun the complete CI/MySQL gate.
+
+Checkpoint WAVE 7 — helper extraction contract
+GitHub Actions 35435684187 passed manifest and the tightened architecture/supply-chain
+gates, then failed the offline extraction contract because App.vue still owned
+shortMoney(), another pure Intl.NumberFormat formatter. Runtime/build C code was not
+implicated.
+
+#### WAVE 7.1 — Complete pure-formatting extraction
+START 2026-09-19
+Scope: move shortMoney into ui-runtime.js, keep the stronger extraction contract,
+lower the App.vue ratchet again to the measured post-extraction size, and rerun
+the complete CI/MySQL gate.
