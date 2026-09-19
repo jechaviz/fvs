@@ -1,0 +1,75 @@
+services:
+  migrate:
+    build: {context: .., dockerfile: deploy/Dockerfile.php}
+    command: ["sh","/app/deploy/preflight.sh","migrate","/usr/local/bin/fvs_migrate","/app/migrations"]
+    env_file: ../.env.production
+    restart: "no"
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    read_only: true
+    tmpfs: ["/tmp:size=64m,mode=1777,nosuid,nodev,noexec"]
+
+  api:
+    build: {context: .., dockerfile: deploy/Dockerfile.php}
+    env_file: ../.env.production
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 45s
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    read_only: true
+    tmpfs: ["/tmp:size=64m,mode=1777,nosuid,nodev,noexec"]
+    pids_limit: 512
+    healthcheck:
+      test: ["CMD","php","-r","require '/app/shim-php/Core.php'; $s=(new FvsCore())->schemaStatus(getenv('FVS_SCHEMA_REQUIRED')?:'001_current.sql'); exit(!empty($s['ready'])?0:1);"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  worker:
+    build: {context: .., dockerfile: deploy/Dockerfile.php}
+    env_file: ../.env.production
+    command: ["sh","/app/deploy/preflight.sh","worker","php","/app/workers/worker.php"]
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 45s
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    read_only: true
+    tmpfs: ["/tmp:size=64m,mode=1777,nosuid,nodev,noexec"]
+    pids_limit: 256
+    volumes: ["vouchers:/app/var/vouchers"]
+
+  marketing:
+    build: {context: .., dockerfile: deploy/Dockerfile.php}
+    env_file: ../.env.production
+    command: ["sh","/app/deploy/preflight.sh","marketing","php","/app/workers/marketing.php"]
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 45s
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    read_only: true
+    tmpfs: ["/tmp:size=32m,mode=1777,nosuid,nodev,noexec"]
+    pids_limit: 256
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+      args: {FVS_NGINX_CONF: "php.conf"}
+    ports: ["8080:80"]
+    environment: {STRIPE_PUBLISHABLE_KEY: "${STRIPE_PUBLISHABLE_KEY:-}", FVS_MARKETING_ATTRIBUTION_ENABLED: "${FVS_MARKETING_ATTRIBUTION_ENABLED:-1}"}
+    restart: unless-stopped
+    init: true
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    tmpfs:
+      - "/tmp:size=16m,mode=1777,nosuid,nodev,noexec"
+      - "/var/cache/nginx:size=32m,mode=1777,nosuid,nodev,noexec"
+      - "/var/run:size=4m,mode=1777,nosuid,nodev,noexec"
+    pids_limit: 256
+    depends_on: {api: {condition: service_healthy}}
+
+volumes: {vouchers: {}}

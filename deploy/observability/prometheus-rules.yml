@@ -1,0 +1,38 @@
+groups:
+  - name: fvs-production
+    rules:
+      - alert: FVSOperationalDegraded
+        expr: fvs_ops_degraded > 0
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: "FVS operational snapshot is degraded"
+          description: "Inspect manual review, worker and outbox metrics before promoting or continuing traffic shifts."
+      - alert: FVSDeadLetterPresent
+        expr: fvs_outbox_dead > 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "FVS has dead-letter outbox events"
+          description: "A voucher/email side effect exhausted retries and needs operator review."
+      - alert: FVSWorkerStale
+        expr: fvs_workers_stale > 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "FVS worker heartbeat is stale"
+          description: "At least one active outbox worker stopped heartbeating."
+      - alert: FVSWebhookLeaseStale
+        expr: fvs_webhook_stale > 0
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: "FVS webhook lease is stale"
+          description: "A payment webhook worker likely died or exceeded its processing lease."
+      - alert: FVSManualReviewGrowing
+        expr: (fvs_manual_review_carts + fvs_manual_review_payments) > 0
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "FVS has payments requiring manual review"
+          description: "Reconcile payment provider state before changing inventory or issuing refunds."

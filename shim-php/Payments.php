@@ -1,0 +1,35 @@
+<?php declare(strict_types=1);
+final class ProviderException extends RuntimeException {}
+function httpJson(string $url,string $method='GET',array $headers=[],?string $body=null):array{
+    $ch=curl_init($url); if($ch===false) throw new ProviderException('curl init failed');
+    if(!str_starts_with($url,'https://'))throw new ProviderException('provider URL must use HTTPS');
+    curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_CUSTOMREQUEST=>$method,CURLOPT_HTTPHEADER=>$headers,CURLOPT_TIMEOUT=>12,CURLOPT_CONNECTTIMEOUT=>5,CURLOPT_FOLLOWLOCATION=>false,CURLOPT_MAXREDIRS=>0,CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,CURLOPT_PROTOCOLS=>CURLPROTO_HTTPS]);
+    if($body!==null) curl_setopt($ch,CURLOPT_POSTFIELDS,$body);
+    $raw=curl_exec($ch);$code=(int)curl_getinfo($ch,CURLINFO_RESPONSE_CODE);$err=curl_error($ch);curl_close($ch);
+    if(!is_string($raw)) throw new ProviderException('provider transport failure: '.$err);
+    if($code<200||$code>=300) throw new ProviderException('provider HTTP '.$code);
+    $data=json_decode($raw,true,512,JSON_THROW_ON_ERROR);return [is_array($data)?$data:[],$raw];
+}
+function minorDecimal(int $minor):string{return intdiv($minor,100).'.'.str_pad((string)abs($minor%100),2,'0',STR_PAD_LEFT);}
+function rawNumberMinor(string $raw,string $key):int{
+    if(!preg_match('/"'.preg_quote($key,'/').'"\s*:\s*(-?\d+(?:\.\d+)?)/',$raw,$m)) throw new ProviderException('missing provider amount');
+    $s=$m[1];$neg=str_starts_with($s,'-');if($neg)$s=substr($s,1);[$whole,$frac]=array_pad(explode('.',$s,2),2,'');$frac=str_pad(substr($frac,0,3),3,'0');$cents=(int)substr($frac,0,2);if((int)$frac[2]>=5)$cents++;$minor=((int)$whole)*100+$cents;return $neg?-$minor:$minor;
+}
+function stripeHeaders():array{$key=getenv('STRIPE_SECRET_KEY');if(!$key)throw new ProviderException('stripe not configured');return ['Authorization: Basic '.base64_encode($key.':'),'User-Agent: FVS/6.0.0'];}
+function stripePrepare(array $a):array{
+    if(!empty($a['provider_checkout_id'])){[$pi]=httpJson('https://api.stripe.com/v1/payment_intents/'.rawurlencode($a['provider_checkout_id']),'GET',stripeHeaders());}
+    else{$body=http_build_query(['amount'=>(string)$a['amount_minor'],'currency'=>strtolower($a['currency']),'receipt_email'=>$a['email'],'automatic_payment_methods'=>['enabled'=>'true'],'metadata'=>['attempt_id'=>$a['attempt_id'],'cart_version'=>(string)$a['cart_version']]]);$headers=array_merge(stripeHeaders(),['Content-Type: application/x-www-form-urlencoded','Idempotency-Key: '.$a['idempotency_key']]);[$pi]=httpJson('https://api.stripe.com/v1/payment_intents','POST',$headers,$body);}
+    $md=$pi['metadata']??[];if((string)($pi['object']??'')!=='payment_intent'||(!empty($a['provider_checkout_id'])&&(string)($pi['id']??'')!==(string)$a['provider_checkout_id'])||(int)($pi['amount']??-1)!==(int)$a['amount_minor']||strtoupper((string)($pi['currency']??''))!==strtoupper($a['currency'])||($md['attempt_id']??'')!==$a['attempt_id']||(string)($md['cart_version']??'')!==(string)$a['cart_version']||(string)($pi['status']??'')==='canceled')throw new ProviderException('stripe attempt mismatch');
+    return ['checkout_id'=>$pi['id'],'payment_id'=>null,'client_secret'=>$pi['client_secret']??null,'redirect_url'=>null];
+}
+function stripeVerify(string $raw,string $header,string $secret,int $tol=300):void{if($secret==='')throw new ProviderException('stripe webhook secret missing');$parts=[];foreach(explode(',',$header) as $p){$kv=explode('=',$p,2);if(count($kv)===2)$parts[trim($kv[0])][]=trim($kv[1]);}$ts=(int)($parts['t'][0]??0);if($ts<=0||abs(time()-$ts)>$tol)throw new ProviderException('invalid stripe timestamp');$expected=hash_hmac('sha256',$ts.'.'.$raw,$secret);$ok=false;foreach($parts['v1']??[] as $v)$ok=$ok||hash_equals($expected,$v);if(!$ok)throw new ProviderException('invalid stripe signature');}
+function stripeFetch(string $id):array{[$p]=httpJson('https://api.stripe.com/v1/payment_intents/'.rawurlencode($id),'GET',stripeHeaders());return $p;}
+function mpHeaders(string $idem=''):array{$token=getenv('MERCADOPAGO_ACCESS_TOKEN');if(!$token)throw new ProviderException('mercadopago not configured');$h=['Authorization: Bearer '.$token,'Content-Type: application/json','User-Agent: FVS/6.0.0'];if($idem!=='')$h[]='X-Idempotency-Key: '.$idem;return $h;}
+function mpPrepare(array $a,string $notify,string $return):array{
+    if(!empty($a['provider_checkout_id'])){[$pref,$raw]=httpJson('https://api.mercadopago.com/checkout/preferences/'.rawurlencode($a['provider_checkout_id']),'GET',mpHeaders());}
+    else{$marker='__FVS_UNIT_PRICE__';$payload=['items'=>[['id'=>$a['attempt_id'],'title'=>'Reserva FVS','quantity'=>1,'currency_id'=>strtoupper($a['currency']),'unit_price'=>$marker]],'payer'=>['email'=>$a['email']],'external_reference'=>$a['attempt_id'],'metadata'=>['attempt_id'=>$a['attempt_id'],'cart_version'=>(string)$a['cart_version']],'notification_url'=>$notify,'back_urls'=>['success'=>$return,'pending'=>$return,'failure'=>$return],'auto_return'=>'approved'];$body=str_replace('"'.$marker.'"',minorDecimal((int)$a['amount_minor']),json_encode($payload,JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR));[$pref,$raw]=httpJson('https://api.mercadopago.com/checkout/preferences','POST',mpHeaders($a['idempotency_key']),$body);}
+    $items=$pref['items']??[];$item=count($items)===1?$items[0]:[];$amount=rawNumberMinor($raw,'unit_price');$cur=strtoupper((string)($item['currency_id']??''));$md=$pref['metadata']??[];if((!empty($a['provider_checkout_id'])&&(string)($pref['id']??'')!==(string)$a['provider_checkout_id'])||($pref['external_reference']??'')!==$a['attempt_id']||(string)($item['id']??'')!==$a['attempt_id']||(int)($item['quantity']??0)!==1||$amount!==(int)$a['amount_minor']||$cur!==strtoupper($a['currency'])||(string)($md['attempt_id']??'')!==$a['attempt_id']||(string)($md['cart_version']??'')!==(string)$a['cart_version'])throw new ProviderException('mercadopago attempt mismatch');
+    $redirect=$pref['init_point']??$pref['sandbox_init_point']??null;if(!is_string($redirect)||!str_starts_with($redirect,'https://'))throw new ProviderException('mercadopago redirect mismatch');return ['checkout_id'=>$pref['id'],'payment_id'=>null,'client_secret'=>null,'redirect_url'=>$redirect];
+}
+function mpVerify(string $sig,string $requestId,string $dataId,string $secret):void{if($secret==='')throw new ProviderException('mercadopago webhook secret missing');$bits=[];foreach(explode(',',$sig) as $p){$kv=explode('=',$p,2);if(count($kv)===2)$bits[trim($kv[0])]=trim($kv[1]);}$ts=$bits['ts']??'';$sup=$bits['v1']??'';if($ts===''||$sup==='')throw new ProviderException('invalid mp signature');$manifest='';if($dataId!=='')$manifest.='id:'.$dataId.';';if($requestId!=='')$manifest.='request-id:'.$requestId.';';$manifest.='ts:'.$ts.';';$expected=hash_hmac('sha256',$manifest,$secret);if(!hash_equals($expected,$sup))throw new ProviderException('invalid mp signature');}
+function mpFetch(string $id):array{[$p,$raw]=httpJson('https://api.mercadopago.com/v1/payments/'.rawurlencode($id),'GET',mpHeaders());$p['_raw']=$raw;return $p;}

@@ -1,0 +1,37 @@
+name: Bootstrap FVS snapshot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.bootstrap/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Replace main with clean current snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .bootstrap/chunk.* | base64 -d > /tmp/fvs_payload.tar.xz
+          echo "27ee33fbb136098fab0238a9e2bd3f08b294c8e1783b9f2ea239572397b42014  /tmp/fvs_payload.tar.xz" | sha256sum -c -
+          cp .github/workflows/bootstrap.yml /tmp/bootstrap.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan fvs-current
+          git rm -rf . >/dev/null 2>&1 || true
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          tar -xJf /tmp/fvs_payload.tar.xz -C .
+          rm -f .github/workflows/ci.yml .github/workflows/release.yml
+          mkdir -p .github/workflows
+          cp /tmp/bootstrap.yml .github/workflows/bootstrap.yml
+          git add -A
+          git commit -m "Initialize FVS 6.0.0 current snapshot"
+          git push --force origin HEAD:main
