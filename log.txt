@@ -201,3 +201,23 @@ START 2026-09-19
 Scope: compare scheduled_at/next_attempt_at/lease_until using UTC_TIMESTAMP(6),
 retain the exact managed-growth predicate and all budget/ROAS guardrails, add an
 immediate-claim regression assertion, and rerun the full CI/MySQL gate.
+
+DONE WAVE 6.3 — Microsecond-consistent job claiming
+Result: marketing job eligibility now compares DATETIME(6) schedule/retry/lease
+timestamps against UTC_TIMESTAMP(6). Closed-loop scale-up and stop-loss decisions
+are immediately claimable without bypassing budget, spend, sample or ROAS guardrails.
+Implementation commit: b6100cd9faba2e697c499fd7c8e938d6544286cc.
+Evidence: GitHub Actions 35435480129 SUCCESS end-to-end, including MySQL 8.
+
+DONE WAVE 6 — Closed-loop Growth
+Result: provider spend is reconciled with authoritative confirmed-order revenue;
+configured min-spend/min-booking/ROAS rules produce idempotent guarded pause/scale
+jobs, applied decisions reconcile internal campaign state, and evidence remains
+auditable rather than magic-threshold automation.
+
+### WAVE 7 — Hotspot Debt Ratchet
+START 2026-09-19
+Scope: extract pure browser/UI helpers from App.vue without Node/runtime changes,
+lock in all hotspot reductions achieved during Waves 1–6 by lowering architecture
+ratchet baselines to measured current sizes, preserve Vue 3 CDN + SFC behavior,
+and rerun the complete CI/MySQL gate.
