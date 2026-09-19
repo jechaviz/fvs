@@ -326,6 +326,53 @@ def main():
     check(sql_value(f"SELECT status FROM marketing_jobs WHERE id='{ab_job}'")=='cancelled','pending abandonment recovery was not cancelled after booking')
     ab_dash=core.abandonment_dashboard(730);check(ab_dash['converted']>=1,ab_dash)
 
+    # Closed-loop growth: provider spend + provider sanity gate, but authoritative order revenue drives the decision.
+    growth=core.marketing_campaign_create('Growth Loop '+tag,'revenue','guarded',200000,10000,'MXN','growth-'+tag,'itest-admin')
+    growth_id=growth['campaign_id']
+    core.marketing_campaign_configure(growth_id,max_daily_spend_minor=20000,frequency_cap_7d=5,target_roas_bps=20000,stop_loss_minor=0,audience={},geo={},placements={},optimization_rules={'min_spend_minor':10000,'min_bookings':1,'pause_below_roas_bps':5000,'scale_up_bps':2500},experiment={},actor='itest-admin')
+    core.marketing_campaign_approve(growth_id,'itest-approver')
+    probe_cid,probe_sec=core.cart_create();core.cart_set_origin(probe_cid,probe_sec,channel='google',campaign_id=growth_id)
+    check(sql_value(f"SELECT source_channel FROM carts WHERE id='{probe_cid}'")=='google','paid-search origin did not bind to cart')
+    sql_exec(f"UPDATE orders SET source_campaign_id='{growth_id}',source_channel='google',source_creative_id=NULL WHERE id='{ab_order['order_id']}'")
+    today=sql_value("SELECT DATE_FORMAT(UTC_DATE(),'%Y-%m-%d')")
+    core.marketing_metric_upsert(growth_id,'google',today,1000,50,10000,5,1,25000,'MXN')
+    loop=core.growth_loop_run(7,50);check(loop['scheduled']>=1,loop)
+    growth_job=sql_value(f"SELECT job_id FROM marketing_growth_decisions WHERE campaign_id='{growth_id}' AND action='increase'")
+    check(len(growth_job)==36,'growth scale-up job missing')
+    check(sql_value(f"SELECT CONCAT(provider_revenue_minor,':',authoritative_revenue_minor,':',proposed_daily_budget_minor) FROM marketing_growth_decisions WHERE job_id='{growth_job}'")==f"25000:{ab_attempt['amount_minor']}:12500",'growth decision did not separate provider vs authoritative revenue')
+    growth_owner='itest-growth:'+tag;growth_claim=None
+    for _ in range(20):
+        j=core.marketing_job_claim(growth_owner,120)
+        if not j:break
+        if j['job_id']==growth_job:
+            growth_claim=j;break
+        core.marketing_job_ack(j['job_id'],growth_owner,j['lease_token'],'itest-drain')
+    check(growth_claim is not None and growth_claim['action']=='update_budget','closed-loop scale job remained blocked at the current daily ceiling')
+    core.growth_decision_apply(growth_job);core.marketing_job_ack(growth_job,growth_owner,growth_claim['lease_token'],'provider-growth-'+tag)
+    check(sql_value(f"SELECT daily_budget_minor FROM marketing_campaigns WHERE id='{growth_id}'")=='12500','applied growth decision did not reconcile internal daily budget')
+    check(sql_value(f"SELECT state FROM marketing_growth_decisions WHERE job_id='{growth_job}'")=='applied','growth decision state not applied')
+    again=core.growth_loop_run(7,50);check(sql_value(f"SELECT COUNT(*) FROM marketing_growth_decisions WHERE campaign_id='{growth_id}' AND action='increase'")=='1','growth loop duplicated same-day scale decision')
+
+    stop=core.marketing_campaign_create('Growth Stop '+tag,'revenue','guarded',200000,10000,'MXN','growth-stop-'+tag,'itest-admin')
+    stop_id=stop['campaign_id']
+    core.marketing_campaign_configure(stop_id,max_daily_spend_minor=20000,frequency_cap_7d=5,target_roas_bps=20000,stop_loss_minor=5000,audience={},geo={},placements={},optimization_rules={'min_spend_minor':10000,'min_bookings':0,'pause_below_roas_bps':5000,'scale_up_bps':0},experiment={},actor='itest-admin')
+    core.marketing_campaign_approve(stop_id,'itest-approver')
+    core.marketing_metric_upsert(stop_id,'google',today,1000,30,10000,0,0,0,'MXN')
+    stopped=core.growth_loop_run(7,50);check(stopped['scheduled']>=1,stopped)
+    stop_job=sql_value(f"SELECT job_id FROM marketing_growth_decisions WHERE campaign_id='{stop_id}' AND action='pause'")
+    stop_claim=None
+    for _ in range(20):
+        j=core.marketing_job_claim(growth_owner,120)
+        if not j:break
+        if j['job_id']==stop_job:
+            stop_claim=j;break
+        core.marketing_job_ack(j['job_id'],growth_owner,j['lease_token'],'itest-drain')
+    check(stop_claim is not None and stop_claim['action']=='pause','growth stop-loss job not claimable')
+    core.growth_decision_apply(stop_job);core.marketing_job_ack(stop_job,growth_owner,stop_claim['lease_token'],'provider-stop-'+tag)
+    check(sql_value(f"SELECT status FROM marketing_campaigns WHERE id='{stop_id}'")=='paused','stop-loss decision did not pause campaign')
+    check(sql_value(f"SELECT action FROM marketing_budget_events WHERE campaign_id='{stop_id}' ORDER BY created_at DESC LIMIT 1")=='stop_loss','stop-loss budget audit missing')
+    growth_dash=core.growth_loop_dashboard(730);check(growth_dash['applied']>=2 and growth_dash['increase']>=1 and growth_dash['pause']>=1,growth_dash)
+
     buyer_points=int(sql_value("SELECT points_balance FROM commerce_loyalty_accounts WHERE email_hash=UNHEX(SHA2('social-itest@example.com',256))"));check(buyer_points==156,f'buyer loyalty mismatch: {buyer_points}')
 
     # Social attribution is multi-currency safe: revenue is bucketed by currency instead of mixed in the link row.

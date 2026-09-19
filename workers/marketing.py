@@ -65,7 +65,9 @@ def once()->bool:
     job=core.marketing_job_claim(owner,int(os.getenv('FVS_MARKETING_LEASE_SECONDS','180')))
     if not job:return False
     try:
-        provider_ref=dispatch(job);core.marketing_job_ack(job['job_id'],owner,job['lease_token'],provider_ref)
+        provider_ref=dispatch(job)
+        if job.get('action') in {'pause','update_budget'}:core.growth_decision_apply(job['job_id'])
+        core.marketing_job_ack(job['job_id'],owner,job['lease_token'],provider_ref)
     except Exception as e:
         print(f"marketing error job={job.get('job_id')} type={type(e).__name__}",file=sys.stderr)
         try:core.marketing_job_nack(job['job_id'],owner,job['lease_token'],type(e).__name__)
@@ -73,7 +75,7 @@ def once()->bool:
     return True
 
 if __name__=='__main__':
-    instance=OWNER_PREFIX;idle=max(.2,float(os.getenv('FVS_MARKETING_IDLE_SECONDS','2')));heartbeat=float(os.getenv('FVS_WORKER_HEARTBEAT_SECONDS','15'));next_hb=0.0
+    instance=OWNER_PREFIX;idle=max(.2,float(os.getenv('FVS_MARKETING_IDLE_SECONDS','2')));heartbeat=float(os.getenv('FVS_WORKER_HEARTBEAT_SECONDS','15'));next_hb=0.0;growth_every=max(60.0,float(os.getenv('FVS_GROWTH_LOOP_SECONDS','300')));next_growth=0.0
     while not STOP:
         now=time.monotonic()
         if now>=next_hb:
@@ -82,6 +84,10 @@ if __name__=='__main__':
                 core.abandonment_scan(int(os.getenv('FVS_ABANDONMENT_IDLE_SECONDS','1800')),int(os.getenv('FVS_ABANDONMENT_SCAN_LIMIT','50')))
             except Exception as e:print(f"marketing heartbeat/scanner error {type(e).__name__}",file=sys.stderr)
             next_hb=now+heartbeat
+        if now>=next_growth:
+            try:core.growth_loop_run(int(os.getenv('FVS_GROWTH_LOOP_DAYS','7')),int(os.getenv('FVS_GROWTH_LOOP_LIMIT','50')))
+            except Exception as e:print(f"marketing growth-loop error {type(e).__name__}",file=sys.stderr)
+            next_growth=now+growth_every
         if not once():time.sleep(idle)
     try:core.worker_goodbye('marketing',instance)
     except Exception:pass

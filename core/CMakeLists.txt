@@ -8,7 +8,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(MARIADB REQUIRED IMPORTED_TARGET mariadb)
 find_package(OpenSSL REQUIRED)
 
-add_library(fvs_core SHARED src/core.c src/util.c src/internal.c src/telemetry.c src/payment_recovery.c src/search_science.c src/experiment_science.c src/abandonment.c)
+add_library(fvs_core SHARED src/core.c src/util.c src/internal.c src/telemetry.c src/payment_recovery.c src/search_science.c src/experiment_science.c src/abandonment.c src/growth_loop.c src/marketing_runtime.c)
 target_include_directories(fvs_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(fvs_core PRIVATE PkgConfig::MARIADB OpenSSL::Crypto m)
 target_compile_definitions(fvs_core PRIVATE FVS_BUILD_DLL)

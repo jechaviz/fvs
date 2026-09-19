@@ -61,6 +61,9 @@ int fvs_marketing_job_nack(fvs_ctx*,const char*,const char*,const char*,const ch
 int fvs_marketing_metric_upsert(fvs_ctx*,const char*,const char*,const char*,unsigned long long,unsigned long long,long long,unsigned long long,unsigned long long,long long,const char*);
 int fvs_marketing_attribution_record(fvs_ctx*,const char*,const char*,const char*,const char*,const char*,const char*,const char*,long long,const char*,const char*,const char*,const char*,const char*,const char*);
 int fvs_marketing_dashboard(fvs_ctx*,unsigned int,char*,size_t);
+int fvs_growth_loop_run(fvs_ctx*,unsigned int,unsigned int,char*,size_t);
+int fvs_growth_decision_apply(fvs_ctx*,const char*);
+int fvs_growth_loop_dashboard(fvs_ctx*,unsigned int,char*,size_t);
 int fvs_abandonment_scan(fvs_ctx*,unsigned int,unsigned int,char*,size_t);
 int fvs_abandonment_dashboard(fvs_ctx*,unsigned int,char*,size_t);
 int fvs_experiment_snapshot(fvs_ctx*,const char*,unsigned int,char*,size_t);

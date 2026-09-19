@@ -513,6 +513,35 @@ CREATE TABLE IF NOT EXISTS commerce_events (
   INDEX ix_commerce_event_currency(currency,event_type,created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE IF NOT EXISTS marketing_growth_decisions (
+  id CHAR(36) PRIMARY KEY,
+  decision_key VARCHAR(191) NOT NULL,
+  campaign_id CHAR(36) NOT NULL,
+  channel VARCHAR(32) NOT NULL,
+  action ENUM('pause','increase') NOT NULL,
+  reason_code VARCHAR(80) NOT NULL,
+  window_days SMALLINT UNSIGNED NOT NULL,
+  spend_minor BIGINT UNSIGNED NOT NULL,
+  provider_revenue_minor BIGINT UNSIGNED NOT NULL,
+  authoritative_revenue_minor BIGINT UNSIGNED NOT NULL,
+  bookings BIGINT UNSIGNED NOT NULL,
+  authoritative_roas_bps INT UNSIGNED NOT NULL,
+  provider_roas_bps INT UNSIGNED NOT NULL,
+  previous_daily_budget_minor BIGINT UNSIGNED NOT NULL,
+  proposed_daily_budget_minor BIGINT UNSIGNED NOT NULL,
+  job_id CHAR(36) NOT NULL,
+  state ENUM('scheduled','applied','superseded') NOT NULL,
+  created_at DATETIME(6) NOT NULL,
+  applied_at DATETIME(6) NULL,
+  updated_at DATETIME(6) NOT NULL,
+  UNIQUE KEY uq_growth_decision_key(decision_key),
+  UNIQUE KEY uq_growth_decision_job(job_id),
+  CONSTRAINT fk_growth_decision_campaign FOREIGN KEY(campaign_id) REFERENCES marketing_campaigns(id) ON DELETE CASCADE,
+  CONSTRAINT fk_growth_decision_job FOREIGN KEY(job_id) REFERENCES marketing_jobs(id) ON DELETE CASCADE,
+  INDEX ix_growth_decision_campaign(campaign_id,state,created_at),
+  INDEX ix_growth_decision_state(state,created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE IF NOT EXISTS commerce_abandonment_cases (
   attempt_id CHAR(36) PRIMARY KEY,
   cart_id CHAR(36) NOT NULL,

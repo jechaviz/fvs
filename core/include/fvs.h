@@ -378,6 +378,13 @@ FVS_API int fvs_payment_recovery_get(fvs_ctx *ctx,const char *attempt_id,
 FVS_API int fvs_payment_recovery_dashboard(fvs_ctx *ctx,unsigned int days,
                                            char *out_json,size_t out_size);
 
+/* Closed-loop growth: evidence-backed guarded pause/scale decisions. */
+FVS_API int fvs_growth_loop_run(fvs_ctx *ctx,unsigned int days,unsigned int limit,
+                                char *out_json,size_t out_size);
+FVS_API int fvs_growth_decision_apply(fvs_ctx *ctx,const char *job_id);
+FVS_API int fvs_growth_loop_dashboard(fvs_ctx *ctx,unsigned int days,
+                                      char *out_json,size_t out_size);
+
 /* Guarded checkout-abandonment recovery queue. */
 FVS_API int fvs_abandonment_scan(fvs_ctx *ctx,unsigned int idle_seconds,unsigned int limit,
                                  char *out_json,size_t out_size);
