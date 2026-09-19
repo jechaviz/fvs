@@ -46,3 +46,14 @@ resume point after an interrupted session.
 START 2026-09-19
 Scope: durable server-side commerce events, funnel/economic dimensions, admin
 metrics and tests for search → cart → checkout → booking observability.
+
+DONE 2026-09-19
+Result: authoritative commerce_events implemented in modular C; Python/PHP emit
+server/provider events for search, cart_add, checkout_start and booking; funnel
+dashboard separates revenue by currency. Commit 1a983569ac4e41accd8e7be69d80c355479aae44.
+Evidence: GitHub Actions 35431621489 SUCCESS, including MySQL 8 integration.
+
+### WAVE 2 — Payment & Checkout Recovery
+START 2026-09-19
+Scope: explicit payment-loss taxonomy, recoverable provider failures, retry state,
+manual-review visibility and recovery metrics without weakening payment binding.
