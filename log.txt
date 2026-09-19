@@ -34,3 +34,15 @@ FVS EXECUTION LOG
 - Re-pinned checkout and upload-artifact to the current v6 immutable SHAs.
 - Expanded the supply-chain gate to inspect both step-level actions and job-level reusable workflows.
 - Added a fixture test proving floating tags/branches are rejected while SHA-pinned actions/reusable workflows pass.
+
+========================================================================
+TRANSACTIONAL ROADMAP EXECUTION — WAVES 1–7
+Protocol: each action opens with START. The previous action is only marked DONE
+when the next action begins. Therefore the final unclosed START is the exact
+resume point after an interrupted session.
+========================================================================
+
+### WAVE 1 — Instrument the money
+START 2026-09-19
+Scope: durable server-side commerce events, funnel/economic dimensions, admin
+metrics and tests for search → cart → checkout → booking observability.
