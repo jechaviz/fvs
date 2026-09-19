@@ -50,6 +50,8 @@ def main():
     for provider in ['stripe','mercadopago']: check(provider in py and provider in ph,f'provider parity {provider}')
     front='\n'.join(p.read_text(errors='ignore') for p in (ROOT/'frontend').rglob('*') if p.is_file())
     lowered=front.lower()
+    for event in ('search','cart','checkout','booking'):
+        check(f"this.track('{event}'" in front,f'funnel telemetry contract missing: {event}')
     check(not (ROOT/'frontend/package.json').exists(),'frontend has no Node package manifest')
     check(not re.search(r"(?:from\s+['\"](?:react|next(?:/|['\"])))|(?:src=['\"][^'\"]*(?:react|next)[^'\"]*)", lowered),'frontend has no React/Next framework dependency')
     check('fvs_cart_secret' not in front,'secret never referenced by frontend')

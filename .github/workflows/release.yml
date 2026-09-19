@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Resolve version
         id: version
         shell: bash
@@ -31,6 +31,8 @@ jobs:
           fi
       - name: Verify committed release manifest
         run: make manifest-verify
+      - name: Architecture + supply-chain gates
+        run: make architecture-gate supply-chain-gate
       - name: Verify release version binding
         env:
           FVS_RELEASE_VERSION: "${{ steps.version.outputs.value }}"
@@ -53,7 +55,7 @@ jobs:
       - name: Build deterministic package
         run: make package VERSION="${{ steps.version.outputs.value }}" PACKAGE="../FVS-${{ steps.version.outputs.value }}.zip"
       - name: Upload package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: FVS-${{ steps.version.outputs.value }}
           path: ../FVS-${{ steps.version.outputs.value }}.zip

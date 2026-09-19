@@ -54,9 +54,11 @@ El mismo conjunto de gates se usa localmente y en GitHub Actions:
 make doctor       # dependencias y configuración básica
 make test         # C, sanitizers, contratos Python/PHP y checks productivos estáticos
 make lint         # Python, PHP, shell y JS cuando Node está disponible
-make analyze      # analizadores estáticos C
-make verify       # test + lint + analyze
-make mysql-test   # integración contra una instancia MySQL ya disponible
+make architecture-gate  # ratchet: los hotspots auditados no pueden crecer silenciosamente
+make supply-chain-gate  # GitHub Actions externas deben usar SHA inmutable
+make analyze            # analizadores estáticos C
+make verify             # gates + test + lint + analyze
+make mysql-test         # integración contra una instancia MySQL ya disponible
 ```
 
 Para ejecutar la integración con MySQL 8.4 aislado mediante Docker:
@@ -95,6 +97,8 @@ python3 scripts/release_gate.py https://fvs.example.com \
 
 ## Documentación
 
+- [`SDD.md`](SDD.md): diseño vigente, invariantes y acciones derivadas del FODA.
+- [`log.txt`](log.txt): bitácora de acciones y evidencias operativas de esta línea de trabajo.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): invariantes, concurrencia, pagos y workers.
 - [`docs/API.md`](docs/API.md): contrato HTTP.
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md): despliegue Python/PHP, migración, probes y restore.

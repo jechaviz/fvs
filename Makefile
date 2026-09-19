@@ -7,7 +7,7 @@ PACKAGE ?= ../FVS-$(VERSION).zip
 BASE_URL ?= http://127.0.0.1:8080
 
 
-.PHONY: bootstrap doctor dev-python dev-php down build test test-c test-asan test-offline test-php test-prod-static analyze lint verify mysql-test smoke manifest manifest-verify package clean
+.PHONY: bootstrap doctor dev-python dev-php down build test test-c test-asan test-offline test-php test-prod-static architecture-gate supply-chain-gate analyze lint verify mysql-test smoke manifest manifest-verify package clean
 
 
 bootstrap:
@@ -57,7 +57,7 @@ test-prod-static:
 	sh tests/test_package_release.sh
 	@set +e; FVS_ENV=production sh deploy/preflight.sh api true >/tmp/fvs-preflight-test.log 2>&1; rc=$$?; set -e; \
 		test $$rc -eq 78 || { cat /tmp/fvs-preflight-test.log; echo "expected production preflight rc=78, got $$rc" >&2; exit 1; }
-	python3 -m py_compile deploy/gunicorn.conf.py scripts/load_smoke.py scripts/release_gate.py scripts/verify_backup.py scripts/admin_key_hash.py scripts/release_manifest.py scripts/package_release.py
+	python3 -m py_compile deploy/gunicorn.conf.py scripts/load_smoke.py scripts/release_gate.py scripts/verify_backup.py scripts/admin_key_hash.py scripts/release_manifest.py scripts/package_release.py scripts/architecture_gate.py scripts/supply_chain_gate.py
 	@for f in deploy/*.sh scripts/*.sh; do sh -n $$f || exit 1; done
 	@grep -q 'FVS_SCHEMA_REQUIRED' .env.example
 	@grep -q 'FVS_DB_SSL_CA' .env.example
@@ -71,6 +71,12 @@ test-prod-static:
 	@grep -q 'proxy_pass http://api:8000' deploy/nginx/python.conf
 	@grep -q 'fastcgi_pass api:9000' deploy/nginx/php.conf
 
+architecture-gate:
+	python3 scripts/architecture_gate.py --root .
+
+supply-chain-gate:
+	python3 scripts/supply_chain_gate.py --root .
+
 analyze:
 	@mkdir -p /tmp/fvs-analyze
 	timeout $(ANALYZE_TIMEOUT)s gcc -std=c17 -Wall -Wextra -Wpedantic -fanalyzer $$(pkg-config --cflags mariadb 2>/dev/null || pkg-config --cflags libmariadb) -I$(CORE)/include -c $(CORE)/src/core.c -o /tmp/fvs-analyze/core.o
@@ -82,7 +88,7 @@ lint:
 	@for f in deploy/*.sh scripts/*.sh; do sh -n $$f || exit 1; done
 	@if command -v node >/dev/null 2>&1; then for f in frontend/js/*.js; do node --check $$f >/dev/null || exit 1; done; fi
 
-verify: test lint analyze
+verify: architecture-gate supply-chain-gate test lint analyze
 
 mysql-test: build
 	FVS_CORE_LIB=$(CURDIR)/$(CORE)/build/release/libfvs_core.so python3 tests/mysql_integration.py

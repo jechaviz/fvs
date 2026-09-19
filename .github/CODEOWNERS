@@ -1,0 +1,12 @@
+# Default owner
+* @jechaviz
+
+# High-risk transactional and deployment surfaces
+/core/ @jechaviz
+/migrations/ @jechaviz
+/shim-python/payments.py @jechaviz
+/shim-php/Payments.php @jechaviz
+/workers/ @jechaviz
+/deploy/ @jechaviz
+/.github/workflows/ @jechaviz
+/RELEASE_MANIFEST.json @jechaviz

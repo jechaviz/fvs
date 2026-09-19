@@ -39,7 +39,14 @@ make down
 make verify
 ```
 
-`verify` encadena tests, lint y análisis estático. Para validar MySQL real:
+`verify` encadena el ratchet arquitectónico, el gate de supply-chain, tests, lint y análisis estático. Los gates también pueden ejecutarse por separado:
+
+```bash
+make architecture-gate
+make supply-chain-gate
+```
+
+El primero impide crecimiento silencioso de los hotspots definidos en `SDD.md`; el segundo exige commits SHA inmutables en toda GitHub Action externa. Para validar MySQL real:
 
 ```bash
 ./scripts/test_mysql_docker.sh
@@ -122,7 +129,7 @@ El gate comprueba liveness/readiness, versión del core, workers, dead-letter, l
 
 ## GitHub Actions
 
-`.github/workflows/ci.yml` verifica primero que `RELEASE_MANIFEST.json` corresponda al árbol comprometido y después ejecuta build, sanitizers, contratos de shims, checks productivos, analizadores, lint e integración MySQL en cada push/PR. Un manifest obsoleto bloquea CI.
+`.github/workflows/ci.yml` verifica primero que `RELEASE_MANIFEST.json` corresponda al árbol comprometido, ejecuta los gates de arquitectura/supply-chain y después build, sanitizers, contratos de shims, checks productivos, analizadores, lint e integración MySQL en cada push/PR. Un manifest obsoleto o una Action externa sin SHA inmutable bloquea CI.
 
 `.github/workflows/release.yml` valida que la versión solicitada/tag coincida con la versión del core, genera el artefacto reproducible y, para tags `v*`, publica el ZIP en una GitHub Release. La release no sustituye el gate contra infraestructura real.
 

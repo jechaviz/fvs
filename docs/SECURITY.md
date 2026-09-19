@@ -41,7 +41,8 @@ La reactivación de dead-letter queda auditada en `ops_actions`. No se implement
 
 ## Riesgos residuales
 
-- **CDN supply-chain:** dependencias pinneadas, pero externas; para mayor criticidad, self-host.
+- **CI supply-chain:** GitHub Actions externas se fijan a commit SHA inmutable y `make supply-chain-gate` impide volver a tags flotantes.
+- **CDN supply-chain:** las dependencias frontend están versionadas pero siguen siendo externas; para mayor criticidad, self-host/SRI sin introducir Node en runtime.
 - **SMTP at-least-once:** caída después de aceptación SMTP y antes del ACK puede duplicar email; use proveedor con idempotencia si se requiere exactly-once práctico.
 - **Nginx rate limit:** es defensa en profundidad. El edge/WAF debe aplicar límites globales y resolver correctamente IP del cliente.
 - **Integridad de rama:** la CI verifica el manifest comprometido, pero `main` debe protegerse en GitHub con el check **FVS CI / verify** obligatorio para impedir bypass por push directo.

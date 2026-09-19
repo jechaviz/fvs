@@ -1,0 +1,28 @@
+FVS EXECUTION LOG
+=================
+
+2026-09-19
+- Audited the current FVS repository after cleanup/consolidation.
+- Confirmed single installable schema baseline: migrations/001_current.sql.
+- Identified and fixed MySQL/MariaDB header portability, Nginx runner binding, MySQL image pin/readiness, trigger/binlog deployment, payment confirmation idempotency, support ordering and multi-currency social revenue.
+- Verified CI success on commit 3f07518e6533c578b1d6be6ebd1714fdc941b052.
+
+2026-09-19 — FODA remediation
+- Found that RELEASE_MANIFEST.json could be stale while CI remained green.
+- Found Python SEO cache/redirect semantic gaps relative to PHP.
+- Found browser-origin support and marketing mutations that executed before the general Origin gate.
+- Found residual FVS-support/4.0 identifier.
+- Fixed those findings in commit 1476e24cde7fe0cbbf0c95a0e53f47d6eb5dccdf.
+- Added committed-manifest verification before build and hardened tagged release publication/version binding.
+- Verified GitHub Actions run 35430280175: manifest, sanitizers/contracts, static analyzers, lint and MySQL 8 integration all SUCCESS.
+
+2026-09-19 — FODA derived actions, current execution
+- Created SDD.md to define architecture, invariants, FODA-to-action mapping and acceptance gates.
+- Created log.txt as an append-only operational summary for this workstream.
+- Captured current hotspot baselines for core.c, App.vue, base.css and HTTP shims.
+- Added an architecture ratchet design: hotspots may shrink but must not silently grow.
+- Added a supply-chain gate design: external GitHub Actions must use immutable 40-hex commit SHAs.
+- Resolved current immutable refs for actions/checkout v4 and actions/upload-artifact v4 from GitHub.
+- Added CODEOWNERS/checklist policy for sensitive paths.
+- Added a funnel observability contract for search → cart → checkout → booking.
+- Pending in this commit: execute full CI after atomic tree + manifest update.
