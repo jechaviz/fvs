@@ -1413,7 +1413,7 @@ int fvs_payment_confirm(fvs_ctx *ctx,const char *attempt_id,const char *provider
         free(sql);
     }
     if(rc==FVS_OK&&social_token[0]){
-        rc=sqlf(ctx,&sql,"INSERT INTO social_sales_link_revenue(link_id,currency,bookings,revenue_minor,updated_at) SELECT id,'%s',1,%lld,UTC_TIMESTAMP() FROM social_sales_links WHERE token='%s' ON DUPLICATE KEY UPDATE bookings=bookings+1,revenue_minor=revenue_minor+VALUES(revenue_minor),updated_at=UTC_TIMESTAMP()",acur,expected,social_token);
+        rc=sqlf(ctx,&sql,"INSERT INTO social_sales_link_revenue(link_id,currency,bookings,revenue_minor,updated_at) SELECT id,'%s',1,%lld,UTC_TIMESTAMP() FROM social_sales_links WHERE token='%s' ON DUPLICATE KEY UPDATE bookings=social_sales_link_revenue.bookings+1,revenue_minor=social_sales_link_revenue.revenue_minor+VALUES(revenue_minor),updated_at=UTC_TIMESTAMP()",acur,expected,social_token);
         if(rc==FVS_OK){ rc=exec_sql(ctx,sql); }
         free(sql);
     }

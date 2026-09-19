@@ -13,7 +13,7 @@
     "core/CMakePresets.json": "801f6b09e4db8fcc77762f83e8caf3110c6fcc6c076fe7a4e3ad7c02b52fc583",
     "core/include/fvs.h": "490197848c76eeffede70c33b7819973067f74253614942636c61277e7e7bdf9",
     "core/include/fvs_ffi.h": "6bd59b4065dfa5d2ecbd6e47f9197812160874a6f7819df02419c755169f66e5",
-    "core/src/core.c": "069e97f4ffcf306fcc90a4ca3f44dc96de17ea58b60f070a5cf2fbe7d40a3813",
+    "core/src/core.c": "171b6ac46e3cbf59c4b28c0e31e96aa81df224cc2650b77e3f73eea70bc13a99",
     "core/src/util.c": "8bf5bfe34226402b3e5ff9e3ec3ce75b7cee8645e2242da499910b461e3e3177",
     "core/tests/test_core.c": "c3f65755e20f11b42263ed3e7540da5239445f1aa7d7efb27e3bb7c6e2e1cb12",
     "core/tools/migrate.c": "3a4809e6d25eacf94cde4287be0c703854d4bfec5e49cfacc2a8cdf51d6bcee3",
@@ -110,6 +110,6 @@
     "workers/worker.py": "ca668d20ed1727aff10409920eca0bcc3c7e8aca7614314a35d483dec0af3300"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "fc9205f2fe1949b10ed69927b4f5c147812bbb025214c69a5aee0c0b8959e66b",
+  "tree_sha256": "c53ebd8645cb2c7d4287ef8acbb27ad9a7867a9df930516de000d451474800a7",
   "version": "6.0.0"
 }
