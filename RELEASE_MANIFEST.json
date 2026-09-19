@@ -12,10 +12,10 @@
     "core/CMakePresets.json": "801f6b09e4db8fcc77762f83e8caf3110c6fcc6c076fe7a4e3ad7c02b52fc583",
     "core/include/fvs.h": "490197848c76eeffede70c33b7819973067f74253614942636c61277e7e7bdf9",
     "core/include/fvs_ffi.h": "6bd59b4065dfa5d2ecbd6e47f9197812160874a6f7819df02419c755169f66e5",
-    "core/src/core.c": "ae75feae2c3c0dd9ada044beb890541fa1efb81cda143d02c68c1fdc38de3c45",
+    "core/src/core.c": "6a6a7ebb2e9965bb586e6c5d4d13a47c0675c2716a47ce5e457a90257b62fc09",
     "core/src/util.c": "8bf5bfe34226402b3e5ff9e3ec3ce75b7cee8645e2242da499910b461e3e3177",
     "core/tests/test_core.c": "c3f65755e20f11b42263ed3e7540da5239445f1aa7d7efb27e3bb7c6e2e1cb12",
-    "core/tools/migrate.c": "f2573917bbf23199eafaba7a3cf090dff4093c6c35866be5dad3a5ae418defbd",
+    "core/tools/migrate.c": "3a4809e6d25eacf94cde4287be0c703854d4bfec5e49cfacc2a8cdf51d6bcee3",
     "deploy/Dockerfile.php": "e23087d8de92b957b6695b57cd667cd18a8fd7ec1a1a277d77fb6cc132106276",
     "deploy/Dockerfile.python": "407a94fc771079274ae261c5dd613a448cc4feb00f35cae77f1543077212789b",
     "deploy/Dockerfile.web": "16b4b215cdfece8b9b285bed7dfd67bb1be6732a8ea20c0ff30f8c9690c5fe30",
@@ -109,6 +109,6 @@
     "workers/worker.py": "ca668d20ed1727aff10409920eca0bcc3c7e8aca7614314a35d483dec0af3300"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "e23bae54b04849d0a0206139b3a58345b63f262fe916cde64e22c59f7d6e8eb8",
+  "tree_sha256": "3c3cd5b92d08b29283db15cd8e28c63b07177c5a917ec273e3f96e99bec907fb",
   "version": "6.0.0"
 }

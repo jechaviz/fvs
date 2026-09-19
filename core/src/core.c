@@ -1,6 +1,6 @@
 #include "fvs.h"
 
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include <ctype.h>
 #include <limits.h>
 #include <stdarg.h>

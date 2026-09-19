@@ -1,6 +1,6 @@
 #include <dirent.h>
 #include <errno.h>
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include <openssl/evp.h>
 #include <stdio.h>
 #include <stdlib.h>
