@@ -1,13 +1,14 @@
 {
   "algorithm": "sha256",
-  "file_count": 105,
+  "file_count": 106,
   "files": {
-    ".env.example": "1dc6b3030b7437bbfcb1363285d3f43bdfe562c96000cd67e8bf0c18564ea501",
+    ".env.example": "2d737be18802e75103b36447d1e6d277098a7d386b325c09a14d5b2abfeffc21",
     ".github/workflows/ci.yml": "1d02e4a2386d4314e31c08ae89da791207aef9c9fe060c22a54997c52a09644f",
     ".github/workflows/release.yml": "97f62b3e8f76a2ed3587d8e14dd61d904445a4e6055c7a1782b7a4a1958e45f1",
     ".gitignore": "ff16106ca7d4d018d9153a4251579330c0068d8da9609a7ce2779563aeb1280c",
     "Makefile": "c773b889f373c18cc721d2b5a2298dd61a75b2fac4fb884f20b399c5cbd3adaf",
     "README.md": "a1c3d155d24a80cf5dcf5bdbfe1a79945a2655077c7d7590cb6ea8a817dd1acb",
+    "RELEASE_NOTES.md": "57a1ff72a05b4f2543804b16da3f2cff270d3bbfef18e7b429cb8115614eb150",
     "core/CMakeLists.txt": "8ce8cdf18c37b5ee9a280e34ea48f4617784bc0619a8c1c85530c7f856d9c439",
     "core/CMakePresets.json": "801f6b09e4db8fcc77762f83e8caf3110c6fcc6c076fe7a4e3ad7c02b52fc583",
     "core/include/fvs.h": "490197848c76eeffede70c33b7819973067f74253614942636c61277e7e7bdf9",
@@ -31,8 +32,8 @@
     "deploy/php-production.ini": "0685fce91cdf14a12c468041adb40f798515bbac6c85a3728fa84430aa8649a9",
     "deploy/preflight.sh": "943d6a454fca6d2f5062189d1251ac7b809696ca34102f7f77b6da7d64517c61",
     "deploy/web-entrypoint.sh": "00226db9bf21c4cc1063679207c96c1aeb5a4a24f834580a62848f136e90b7f8",
-    "docker-compose.php.yml": "4fabcc31ba2a056ed301561684fe31674c4c13a5e3ccb010e34aab15ee3a5022",
-    "docker-compose.python.yml": "d3337563802adce768c49f82dcfa2832d1186aa20fe02f6ddfb1f40cb4c8accd",
+    "docker-compose.php.yml": "d3efd37c612dc10e9f3ae5d7fa1e2cd5c4e7ae49e8139ac94800305f27607fb0",
+    "docker-compose.python.yml": "7ad0039079b9f5f3230e957f6f3762eeec980268a52e715216a40dc09266fde4",
     "docs/API.md": "e41df8b55a8736d14b18551cc69aa41b1b1861bbba9275cd3f56855f98b47d04",
     "docs/ARCHITECTURE.md": "1519a9b6564216f7f170a5b4791bbf028ce9c90530915752e29e9754134efd17",
     "docs/AUTOMATION.md": "4dd61fa178847158a3ca15b7b416b7e273cf40a91eb8c77d525c191ecb98cebf",
@@ -76,7 +77,7 @@
     "scripts/release_manifest.py": "8a3b38b0c7a14bdab49a601c68ed3efc5f022d8675b89026c4d4a8ba96a54624",
     "scripts/restore_drill.sh": "31ac7207f3922fa6244a8a8d5151a289ab66c08dcaaeba411a0e79cfb9c10c55",
     "scripts/restore_mysql.sh": "84136c02b261f1810abdae7bfc7b4e8f19037e5af4a7377753df0e0dff37b7dc",
-    "scripts/test_mysql_docker.sh": "0d56190e2242eb32481186798dfaa7044a5b65b56eff427aa536eb74df3487be",
+    "scripts/test_mysql_docker.sh": "d54e461cae490ac261ef1a84a716e14328501052323f8e25f3896e08c2883067",
     "scripts/verify_backup.py": "c066e0dc4b1d65d78418c28042fcdb16e8c2819a33998b9f07e972927b71e9a3",
     "shim-php/Core.php": "c5999cde11d521862a3b56934240f4839b3048f16ed273655a06060153b75eac",
     "shim-php/Enterprise.php": "9cc0587802bbd19d6021b3c4e49e5a22acba306fda156dc96ddd471792a32bb1",
@@ -109,6 +110,6 @@
     "workers/worker.py": "ca668d20ed1727aff10409920eca0bcc3c7e8aca7614314a35d483dec0af3300"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "6ed4ffeec93e731ff453eb9cb301067215fd178ec27be30d17baad19156b2e01",
+  "tree_sha256": "abb1b1e90459c03e5dd632877b14ca80ffadc42082589aeadb08e10fa56cbf8d",
   "version": "6.0.0"
 }
