@@ -1,6 +1,6 @@
 {
   "algorithm": "sha256",
-  "file_count": 125,
+  "file_count": 126,
   "files": {
     ".env.example": "9b3e41dc91398753d66f6847a9a6d6a4cc3e7a5445690f14460beee4731ad1be",
     ".github/workflows/ci.yml": "e80ee0a75b470569141a8b5e81107721af07fe5be8cdad5669bcb1c463a4174c",
@@ -51,9 +51,9 @@
     "docs/runbooks/INCIDENT_PAYMENTS.md": "839304aa6a94ed091312b2072ad632498b579ada4b08fa298b9f09455fe6786c",
     "docs/runbooks/SOCIAL_COMMERCE.md": "ed92254b19f4f3907909bb3cbee2916a01bf8025578ae9fd364319db43b3499c",
     "frontend/admin.html": "ff30fdc5e8eb2816cd879e0c3dfdef1d45c9fc8289278336257c5ff6413d0507",
-    "frontend/components/App.vue": "fbdbfaf69cd6a7ac351d34cc8182609ddb45e684df34a0498e60162bc6168af1",
+    "frontend/components/App.vue": "0f0d46bba09e8bb1ede6773b52fd904ce5817fad903415870bb49c845becbbab",
     "frontend/css/base.css": "9c08caf95a4e888b71295306b28026fa9285372f64dc2940725f629502f209ee",
-    "frontend/index.html": "b64f8fbb76b4327873540d84f9e6c314c9eb6f3d76ec803d412b17dcd5998259",
+    "frontend/index.html": "bc626586258abe6ac6d41f1579412ba055b87d2c2dd3c37ce03c70e3c21d851c",
     "frontend/js/admin.js": "ecbd132f7f7c2868a296ac9f24864968bf6f1dcd2679fb5a6c563b4533e78280",
     "frontend/js/attribution.js": "ea265ca931bab780cc3179b2947c2d25f9bd29c9f3978ee035997a2827a7c576",
     "frontend/js/bootstrap.js": "220a274bc9a0657c3d6e40f8301a244a1decb2451ba670b4222e3c3e97b7e0d7",
@@ -95,7 +95,7 @@
     "tests/mysql_integration.py": "744aa599c62efc187c4b45f19984a13358617648820ca06dea79be3f1a9418a9",
     "tests/test_backup_verify.sh": "dcd9cf43ea0e69aa9a5e6f6b138e7526fb5dc6573866c04bf6aec6ffa8393b9e",
     "tests/test_nginx_config.sh": "5ce579ac9418bb838f060cea8b2992659b418e6a767aafeea1a3066035bed7a0",
-    "tests/test_offline.py": "2a18bfda8d2b84a489dbf7f60cf2210067e6720254b2d0fd6f98e7297e1cc43f",
+    "tests/test_offline.py": "eb1cfdf0cd96a0791807d10a887373585f1eec388a38eb28163123e9bad79a3b",
     "tests/test_package_release.sh": "5470083306d51394bef957f2e7c20d1799f8a1102ed93fdfdec11a8abc0db03e",
     "tests/test_php.php": "d1d972d92734a8104c18d3cfc740fcefc100a6c77ee81b7ea712ae135d0879ec",
     "tests/test_preflight.sh": "db2c33f49c5101b2c53d712260d95fb55feea009b7e1f916df6e15218fec6456",
@@ -107,9 +107,9 @@
     "workers/support_ai.py": "a958cef9cd9435a3f6b312f9ebcd4e7c325086ad49689e243b3f7c21e2cdd7f6",
     "workers/worker.php": "f9074fb78fc60d2ed2976f9049920258a5d477bbf0940d26be5a79254a4c1ab3",
     "workers/worker.py": "ca668d20ed1727aff10409920eca0bcc3c7e8aca7614314a35d483dec0af3300",
-    "SDD.md": "297345589ccd97386d4bc2b387bdf1925e0db5c085a075c1c3e78912f33c6894",
+    "SDD.md": "849763bf3af0af44c6e9d6fa8c09e1f5a0939f544248c23f3265c41a0068d080",
     "log.txt": "72341ad3b5494f555ceb412cd01d69d7858d2afdd8c544a4d55f7fa75823aac8",
-    "scripts/architecture_gate.py": "2678b6ed83e6449cefccf5972d10a4e21c57c8f82c42efe9ba3fa7d596218a93",
+    "scripts/architecture_gate.py": "7fe32d75ae425e3bea0ee11bcd56816f68f771854b8f27f3120da67700bda1a6",
     "scripts/supply_chain_gate.py": "427f869609396fb912a3cc078c276ac4bd951e9c39b0e4dec9a81b319987f03a",
     ".github/CODEOWNERS": "00db9f0d9704d992495ed7cf2f976dd9f461f6e4e535e4f791d7d6536c879db6",
     ".github/pull_request_template.md": "dd033ab1b587fe936133ad20a761ab44d184a25809d376e2a0035442654cb8ff",
@@ -126,9 +126,10 @@
     "core/src/experiment_science.c": "bafe2341b0830e8233cc079f8d228674714f03e530fa297f813e79ae43befc38",
     "core/src/abandonment.c": "bcd8a93376db7499d8e7e46b6c7add97cbcb4e88f9a3aa755da392aeac7314a4",
     "core/src/growth_loop.c": "af74800cb83ed992d26cab28363b15c2ac19188ab37bdf5a4830ec9258510f74",
-    "core/src/marketing_runtime.c": "eedba327e3d9d784bad17a18e4c7b4e1d3bab6a0d97d198f8ec6056e4ef7679d"
+    "core/src/marketing_runtime.c": "eedba327e3d9d784bad17a18e4c7b4e1d3bab6a0d97d198f8ec6056e4ef7679d",
+    "frontend/js/ui-runtime.js": "4bc7946f6d4d6ac58d129ed4f6734dc90bdf8e1195d513b821758372bd04eeca"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "609dfa02ca43230b7430fa943614585dd769ad2b15954d7098ac553ad10a66da",
+  "tree_sha256": "d88296767bcff64fb3b8a09089748ec3f836545258c3bbaea04b38ab55716e61",
   "version": "6.0.0"
 }

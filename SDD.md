@@ -17,7 +17,7 @@ El sistema debe optimizar conversión y operación sin sacrificar las garantías
 - **Core C17:** autoridad de inventario, holds, pricing, promociones, checkout, confirmación, órdenes, outbox, soporte, social commerce y métricas.
 - **MySQL 8.4:** persistencia transaccional InnoDB, locks explícitos, schema actual único en `migrations/001_current.sql`.
 - **Shims Python/PHP:** dos adaptadores HTTP sobre el mismo ABI C. Deben mantener paridad de rutas y semántica.
-- **Frontend Vue 3 CDN/SFC + UnoCSS runtime:** cliente sin Node en runtime; no es autoridad de precio ni disponibilidad.
+- **Frontend Vue 3 CDN/SFC + UnoCSS runtime:** cliente sin Node en runtime; no es autoridad de precio ni disponibilidad. Helpers browser puros compartidos viven en `frontend/js/ui-runtime.js` para mantener el SFC enfocado en estado/orquestación.
 - **Workers:** outbox, voucher/email, soporte IA y marketing con leases/fencing.
 - **Edge Nginx:** CSP, rate limits, headers y proxy/FastCGI.
 - **Release:** manifest SHA-256, ZIP determinista, CI y release workflow.
@@ -56,11 +56,11 @@ Los hotspots actuales son:
 
 | Ruta | Baseline líneas | Baseline bytes | Acción |
 | --- | ---: | ---: | --- |
-| `core/src/core.c` | 2240 | 204116 | No crecer; extraer por dominio al tocar código relacionado. |
-| `frontend/components/App.vue` | 300 | 60915 | No crecer; mover comportamiento reusable a módulos/componentes SFC. |
+| `core/src/core.c` | 2232 | 198806 | No crecer; las waves ya extrajeron runtime/science a módulos C. |
+| `frontend/components/App.vue` | 291 | 58349 | No crecer; helpers puros viven en `frontend/js/ui-runtime.js`. |
 | `frontend/css/base.css` | 40 | 46018 | No crecer; separar por responsabilidad cuando se modifique. |
-| `shim-python/app.py` | 424 | 34793 | No crecer; extraer handlers por dominio cuando sea necesario. |
-| `shim-php/index.php` | 83 | 25116 | No crecer; mantener paridad con módulos equivalentes. |
+| `shim-python/app.py` | 417 | 34442 | No crecer; provider recovery ya está extraído. |
+| `shim-php/index.php` | 82 | 24683 | No crecer; mantener paridad con módulos equivalentes. |
 
 Estos números no son límites “ideales”; son un **ratchet del estado auditado**. Reducirlos es válido. Aumentarlos requiere primero extraer responsabilidad o justificar explícitamente un nuevo baseline.
 

@@ -211,11 +211,7 @@
   </Transition>
 </template>
 <script>
-const api=async(url,opt={})=>{const r=await fetch(url,{credentials:'same-origin',headers:{'Content-Type':'application/json',...(opt.headers||{})},...opt});const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||'request_failed');e.status=r.status;throw e;}return j;};
-const pad=n=>String(n).padStart(2,'0');
-const debounce=(fn,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}};
-const localJson=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch{return fallback}};
-const savedView=()=>{const v=localStorage.getItem('fvs_view');return ['list','split','map'].includes(v)?v:'split'};
+const {api,pad,debounce,localJson,savedView}=window.FVS_UI;
 export default {
   data(){return {
     search:{q:'',check_in:'',check_out:'',guests:2,country:'',city:'',resort:'',property_type:'',season:'',booking_mode:'',amenities:[],min_bedrooms:0,min_bathrooms:0,min_rating_x100:0,min_price_minor:0,max_price_minor:0,sort:'relevance'},
@@ -226,7 +222,7 @@ export default {
     support:{open:false,threadId:localStorage.getItem('fvs_support_thread_id')||'',thread:null,email:'',input:'',sending:false,waiting:false,error:'',poll:null},
     commerce:{collections:[],addons:[],membership_plans:[],promotions:[]},activeCollection:null,compareIds:(()=>{const v=localJson('fvs_compare',[]);return Array.isArray(v)?v.filter(x=>typeof x==='string').slice(0,4):[]})(),compareOpen:false,quickView:null,recommendations:[],promoInput:'',promoBusy:false,promoMessage:'',promoState:'',membershipOpen:false,
     socialOrigin:{channel:'',token:'',slot:'',collection:'',campaign_id:'',creative_id:'',promo:''},originBound:false,
-    fallback:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#edf2f7"/><stop offset="1" stop-color="#dfe7f1"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#718096" font-family="sans-serif" font-size="32">FVS</text></svg>')
+    fallback:window.FVS_UI.fallback
   }},
   computed:{
     cartCount(){return this.cart?.items?.length||0},
@@ -243,13 +239,8 @@ export default {
   async mounted(){this.hydrateSearch();this.hydrateCommerceIntent();const d=new Date(),ci=new Date(d.getTime()+30*86400000),co=new Date(d.getTime()+37*86400000);if(!this.search.check_in)this.search.check_in=`${ci.getFullYear()}-${pad(ci.getMonth()+1)}-${pad(ci.getDate())}`;if(!this.search.check_out)this.search.check_out=`${co.getFullYear()}-${pad(co.getMonth()+1)}-${pad(co.getDate())}`;this.timer=setInterval(()=>this.now=Date.now(),1000);this._suggestDebounced=debounce(()=>this.fetchSuggestions(),180);this._searchDebounced=debounce(()=>this.loadInventory(),320);window.addEventListener('keydown',this.onGlobalKey);await Promise.all([this.loadCommerce(),this.restoreCart()]);if(this.cartId)await this.bindOrigin();const returned=new URLSearchParams(location.search).has('checkout')||new URLSearchParams(location.search).has('payment_intent');if(returned||['checkout','paid','manual_review'].includes(this.cart?.status)){this.drawer=true;await this.resumeCheckout();}if(this.socialOrigin.collection)await this.openCollectionBySlug(this.socialOrigin.collection,false);else await this.loadInventory();if(this.view!=='list')await this.initMap();if(this.support.threadId)this.refreshSupport();},
   beforeUnmount(){clearInterval(this.timer);if(this.support.poll)clearInterval(this.support.poll);window.removeEventListener('keydown',this.onGlobalKey);this.destroyMap()},
   methods:{
-    money(v,c){try{return new Intl.NumberFormat('es-MX',{style:'currency',currency:c||'MXN',maximumFractionDigits:0}).format((Number(v)||0)/100)}catch{return `${(Number(v)||0)/100} ${c}`}},minorToMajor(v){return v?Math.round(Number(v)/100):''},
-    fmtDate(s){if(!s)return '';return new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(s+'T00:00:00Z'))},fmtDateShort(s){if(!s)return '';return new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(s+'T00:00:00Z'))},
-    countdown(ts){if(!ts)return '—';const n=Math.max(0,Math.floor((new Date(ts).getTime()-this.now)/1000));return `${Math.floor(n/60)}:${String(n%60).padStart(2,'0')}`},seoUrl(p){return `/stay/vacation-rental-${String(p.id||'').slice(0,8)}`},
-    amenityLabel(a){const map={pool:'Alberca',wifi:'Wi‑Fi',beach:'Playa',parking:'Estacionamiento',kitchen:'Cocina',gym:'Gimnasio',spa:'Spa','ocean-view':'Vista al mar',ski:'Ski',fireplace:'Chimenea','pet-friendly':'Pet friendly'};return map[a]||String(a).replace(/[-_]/g,' ').replace(/^./,x=>x.toUpperCase())},
-    suggestionGlyph(t){return t==='country'?'◎':t==='city'?'⌖':t==='resort'?'◇':'⌂'},suggestionTypeLabel(t){return t==='country'?'País':t==='city'?'Ciudad':t==='resort'?'Resort':'Propiedad'},
+    ...window.FVS_UI.methods,
     track(type,extra={}){try{window.FVS_ATTR?.track(type,extra)}catch{}},
-    socialChannelLabel(c){const m={instagram:'Instagram',meta:'Meta',facebook:'Facebook',tiktok:'TikTok',pinterest:'Pinterest',whatsapp:'WhatsApp',youtube:'YouTube',x:'X',linkedin:'LinkedIn',google:'Google'};return m[c]||c||'Social'},
     hydrateCommerceIntent(){const q=new URLSearchParams(location.search);this.socialOrigin={channel:q.get('utm_source')||'',token:q.get('fvs_social')||'',slot:q.get('slot')||'',collection:q.get('collection')||'',campaign_id:q.get('campaign_id')||'',creative_id:q.get('creative_id')||'',promo:q.get('promo')||''};if(this.socialOrigin.token&&!this.socialOrigin.channel)this.socialOrigin.channel='social';},
     async loadCommerce(){try{const c=await api('/api/v1/commerce/home');this.commerce={collections:c.collections||[],addons:c.addons||[],membership_plans:c.membership_plans||[],promotions:c.promotions||[]};if(!this.promoInput&&this.socialOrigin.promo)this.promoInput=this.socialOrigin.promo}catch(e){console.warn('commerce unavailable',e)}},
     async openCollection(c){return this.openCollectionBySlug(c.slug,true)},

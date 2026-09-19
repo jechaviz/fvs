@@ -6,11 +6,11 @@ import json
 from pathlib import Path
 
 BASELINE = {
-    "core/src/core.c": {"lines": 2240, "bytes": 204116},
-    "frontend/components/App.vue": {"lines": 300, "bytes": 60915},
+    "core/src/core.c": {"lines": 2232, "bytes": 198806},
+    "frontend/components/App.vue": {"lines": 291, "bytes": 58349},
     "frontend/css/base.css": {"lines": 40, "bytes": 46018},
-    "shim-python/app.py": {"lines": 424, "bytes": 34793},
-    "shim-php/index.php": {"lines": 83, "bytes": 25116},
+    "shim-python/app.py": {"lines": 417, "bytes": 34442},
+    "shim-php/index.php": {"lines": 82, "bytes": 24683},
 }
 
 
