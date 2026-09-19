@@ -6,7 +6,7 @@ for src in deploy/nginx/python.conf deploy/nginx/php.conf; do
   trap 'rm -rf "$tmp"' EXIT HUP INT TERM
   mkdir -p "$tmp/conf.d" "$tmp/html" "$tmp/logs"
   cp /etc/nginx/fastcgi_params "$tmp/fastcgi_params"
-  sed 's/http:\/\/api:8000/http:\/\/127.0.0.1:18000/g; s/fastcgi_pass api:9000/fastcgi_pass 127.0.0.1:19000/g' "$src" > "$tmp/conf.d/default.conf"
+  sed 's/listen 80;/listen 127.0.0.1:18080;/g; s/http:\/\/api:8000/http:\/\/127.0.0.1:18000/g; s/fastcgi_pass api:9000/fastcgi_pass 127.0.0.1:19000/g' "$src" > "$tmp/conf.d/default.conf"
   cat > "$tmp/nginx.conf" <<CONF
 error_log stderr warn;
 pid $tmp/nginx.pid;

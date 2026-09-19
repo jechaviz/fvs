@@ -94,7 +94,7 @@
     "shim-python/serve.py": "ec79a895a7f9685ca15e1ecd8248e66c555cac21d2d35de53d21131f515c9ce8",
     "tests/mysql_integration.py": "350c1f41f2e6e0f78d95225c8e676deedd3b7f25167fe8fdf4ee822d23170428",
     "tests/test_backup_verify.sh": "dcd9cf43ea0e69aa9a5e6f6b138e7526fb5dc6573866c04bf6aec6ffa8393b9e",
-    "tests/test_nginx_config.sh": "fc0e5902674653554c07fbf2f91a1e56fbbd24c89125adf3921ad9c6368db161",
+    "tests/test_nginx_config.sh": "5ce579ac9418bb838f060cea8b2992659b418e6a767aafeea1a3066035bed7a0",
     "tests/test_offline.py": "d92c897a4e658c6eb4ff02742da0781b8a5e124f4edfde2e1ae63dcdd738b3ca",
     "tests/test_package_release.sh": "5470083306d51394bef957f2e7c20d1799f8a1102ed93fdfdec11a8abc0db03e",
     "tests/test_php.php": "d1d972d92734a8104c18d3cfc740fcefc100a6c77ee81b7ea712ae135d0879ec",
@@ -109,6 +109,6 @@
     "workers/worker.py": "ca668d20ed1727aff10409920eca0bcc3c7e8aca7614314a35d483dec0af3300"
   },
   "format": "fvs-release-manifest-v1",
-  "tree_sha256": "3c3cd5b92d08b29283db15cd8e28c63b07177c5a917ec273e3f96e99bec907fb",
+  "tree_sha256": "6ed4ffeec93e731ff453eb9cb301067215fd178ec27be30d17baad19156b2e01",
   "version": "6.0.0"
 }
