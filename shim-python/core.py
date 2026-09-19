@@ -131,6 +131,7 @@ def _json_call(fn, *args):
     return json.loads(out.value.decode("utf-8"))
 
 def version(): return lib.fvs_version().decode()
+def search_ranking_version(): return lib.fvs_search_ranking_version().decode()
 def ping():
     c=ctx(); rc=lib.fvs_ping(c)
     if rc: _err(c,rc)
@@ -149,7 +150,7 @@ def inventory_search_v2(filters):
         int(filters.get("min_price_minor") or 0), int(filters.get("max_price_minor") or 0),
         float(bbox[0]),float(bbox[1]),float(bbox[2]),float(bbox[3]),use_bbox,b(str(filters.get("sort") or "relevance")),int(filters.get("limit") or 60),int(filters.get("offset") or 0))
     if int(filters.get("offset") or 0)==0:
-        _commerce_event_safe(event_type="search",source="server",query_text=str(filters.get("q") or "")[:300],result_count=int(result.get("total") or len(result.get("items") or [])),metadata_json={"sort":str(filters.get("sort") or "relevance"),"country":str(filters.get("country") or ""), "city":str(filters.get("city") or ""), "ranking_version":"search-v1"})
+        _commerce_event_safe(event_type="search",source="server",query_text=str(filters.get("q") or "")[:300],result_count=int(result.get("total") or len(result.get("items") or [])),metadata_json={"sort":str(filters.get("sort") or "relevance"),"country":str(filters.get("country") or ""), "city":str(filters.get("city") or ""), "ranking_version":search_ranking_version()})
     return result
 def inventory_suggest(query,limit=10): return _json_call(lib.fvs_inventory_suggest,b(query),int(limit))
 def inventory_upsert(row):
@@ -268,6 +269,9 @@ lib.fvs_marketing_job_nack.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctype
 lib.fvs_marketing_metric_upsert.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_ulonglong,ctypes.c_ulonglong,ctypes.c_longlong,ctypes.c_ulonglong,ctypes.c_ulonglong,ctypes.c_longlong,ctypes.c_char_p];lib.fvs_marketing_metric_upsert.restype=ctypes.c_int
 lib.fvs_marketing_attribution_record.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_longlong,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p];lib.fvs_marketing_attribution_record.restype=ctypes.c_int
 lib.fvs_marketing_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_marketing_dashboard.restype=ctypes.c_int
+lib.fvs_search_ranking_version.argtypes=[];lib.fvs_search_ranking_version.restype=ctypes.c_char_p
+lib.fvs_search_eval_record.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_uint,ctypes.c_uint,ctypes.c_uint,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_search_eval_record.restype=ctypes.c_int
+lib.fvs_search_quality_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_search_quality_dashboard.restype=ctypes.c_int
 lib.fvs_payment_recovery_mark.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_char_p,ctypes.c_uint];lib.fvs_payment_recovery_mark.restype=ctypes.c_int
 lib.fvs_payment_recovery_get.argtypes=[ctx_p,ctypes.c_char_p,ctypes.c_char_p,size_t];lib.fvs_payment_recovery_get.restype=ctypes.c_int
 lib.fvs_payment_recovery_dashboard.argtypes=[ctx_p,ctypes.c_uint,ctypes.c_char_p,size_t];lib.fvs_payment_recovery_dashboard.restype=ctypes.c_int
@@ -348,6 +352,11 @@ def marketing_metric_upsert(campaign_id,channel,metric_date,impressions,clicks,s
 def marketing_attribution_record(**v):
     c=ctx();rc=lib.fvs_marketing_attribution_record(c,b(v.get('campaign_id') or ''),b(v.get('channel') or ''),b(v.get('creative_id') or ''),b(v.get('visitor_id') or ''),b(v.get('session_id') or ''),b(v.get('order_id') or ''),b(v['event_type']),int(v.get('value_minor') or 0),b(v.get('currency') or ''),b(v.get('utm_source') or ''),b(v.get('utm_medium') or ''),b(v.get('utm_campaign') or ''),b(v.get('utm_content') or ''),b(v.get('referrer') or ''))
     if rc:_err(c,rc)
+def search_eval_record(ranking_version,corpus_sha256,mrr,ndcg10,precision10,query_count):
+    ppm=lambda x:max(0,min(1000000,int(round(float(x)*1000000))))
+    return _json_call(lib.fvs_search_eval_record,b(ranking_version),b(corpus_sha256),ppm(mrr),ppm(ndcg10),ppm(precision10),int(query_count))
+def search_quality_dashboard(days=30): return _json_call(lib.fvs_search_quality_dashboard,int(days))
+
 def payment_recovery_mark(attempt_id,state,reason_code="",last_error="",retry_after_seconds=0):
     c=ctx();rc=lib.fvs_payment_recovery_mark(c,b(attempt_id),b(state),b(reason_code),b(last_error),int(retry_after_seconds))
     if rc:_err(c,rc)
@@ -369,6 +378,8 @@ def marketing_dashboard(days=30):
     except Exception: result["funnel"]={"unavailable":True}
     try: result["recovery"]=payment_recovery_dashboard(days)
     except Exception: result["recovery"]={"unavailable":True}
+    try: result["search_quality"]=search_quality_dashboard(days)
+    except Exception: result["search_quality"]={"unavailable":True}
     return result
 
 def commerce_home(): return _json_call(lib.fvs_commerce_home)

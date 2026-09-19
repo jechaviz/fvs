@@ -513,6 +513,19 @@ CREATE TABLE IF NOT EXISTS commerce_events (
   INDEX ix_commerce_event_currency(currency,event_type,created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE IF NOT EXISTS search_eval_runs (
+  id CHAR(36) PRIMARY KEY,
+  ranking_version VARCHAR(48) NOT NULL,
+  corpus_sha256 CHAR(64) NOT NULL,
+  mrr_ppm INT UNSIGNED NOT NULL,
+  ndcg10_ppm INT UNSIGNED NOT NULL,
+  precision10_ppm INT UNSIGNED NOT NULL,
+  query_count INT UNSIGNED NOT NULL,
+  created_at DATETIME(6) NOT NULL,
+  INDEX ix_search_eval_version(ranking_version,created_at),
+  INDEX ix_search_eval_corpus(corpus_sha256,created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- domain section: seo
 CREATE TABLE IF NOT EXISTS seo_pages (
   id CHAR(36) PRIMARY KEY,

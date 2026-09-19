@@ -88,8 +88,9 @@ def main():
     check('marketing_budget_events' in migrations and 'frequency_cap_7d' in migrations and 'stop_loss_minor' in migrations,'marketing guardrails and budget audit are migrated')
     check('commerce_events' in migrations and 'uq_commerce_event_key' in migrations and 'ix_commerce_event_currency' in migrations,'durable commerce telemetry schema is migrated')
     check('payment_recovery_cases' in migrations and 'ix_payment_recovery_state' in migrations,'payment recovery state is migrated')
+    check('search_eval_runs' in migrations and 'ix_search_eval_version' in migrations,'search evaluation evidence is migrated')
     cmake=(ROOT/'core/CMakeLists.txt').read_text()
-    check('src/internal.c' in cmake and 'src/telemetry.c' in cmake and 'src/payment_recovery.c' in cmake,'commerce telemetry/recovery are compiled as separate core modules')
+    check('src/internal.c' in cmake and 'src/telemetry.c' in cmake and 'src/payment_recovery.c' in cmake and 'src/search_science.c' in cmake,'commerce telemetry/recovery/search science are compiled as separate core modules')
     core_src=(ROOT/'core/src/core.c').read_text()
     check('fvs_inventory_upsert_v2' in core_src and 'booking_mode' in core_src and 'week_number_snapshot' in core_src and 'float_group_snapshot' in core_src,'week metadata flows through core')
     check('ci.price_minor=s.price_minor' in core_src and 'ci.hold_expires_at<=UTC_TIMESTAMP()' in core_src and "s.hold_expires_at<=UTC_TIMESTAMP()" in core_src,'expired hold repricing watches both hold clocks')
@@ -171,6 +172,8 @@ def main():
     check('commerce_event_record' in shim_core and 'commerceEventRecord' in (ROOT/'shim-php/Core.php').read_text(),'both shims emit authoritative commerce telemetry')
     check('commerce_funnel_dashboard' in shim_core and 'commerceFunnelDashboard' in (ROOT/'shim-php/Core.php').read_text(),'both shims expose authoritative funnel metrics')
     check('payment_recovery_mark' in shim_core and 'paymentRecoveryMark' in (ROOT/'shim-php/Core.php').read_text(),'both shims expose payment recovery state')
+    check('search_ranking_version' in shim_core and 'searchRankingVersion' in (ROOT/'shim-php/Core.php').read_text(),'ranking version comes from the core in both shims')
+    check('search_quality_dashboard' in shim_core and 'searchQualityDashboard' in (ROOT/'shim-php/Core.php').read_text(),'both shims expose search quality evidence')
     check((ROOT/'shim-python/recovery.py').exists() and (ROOT/'shim-php/Recovery.php').exists(),'provider recovery is extracted from HTTP hotspots')
     check('def _provider_prepare' not in app_py and 'function providerPrepare(' not in app_php,'provider preparation no longer lives in HTTP entrypoints')
     check("event_type=\"search\"" in shim_core and "event_type=\"cart_add\"" in shim_core and "event_type=\"checkout_start\"" in shim_core and "event_type=\"booking\"" in shim_core,'python commerce funnel instrumentation is wired')
@@ -197,6 +200,14 @@ def main():
         support_mod.core.support_handoff=old_handoff
         if old_enabled is None: os.environ.pop('FVS_SUPPORT_AI_ENABLED',None)
         else: os.environ['FVS_SUPPORT_AI_ENABLED']=old_enabled
+    # Search metric math is deterministic over the committed fixed corpus.
+    search_spec=importlib.util.spec_from_file_location('fvs_search_eval',ROOT/'scripts/search_eval.py');search_mod=importlib.util.module_from_spec(search_spec);search_spec.loader.exec_module(search_mod)
+    corpus_path=ROOT/'tests/fixtures/search_eval_v1.json';corpus=search_mod.load_corpus(corpus_path)
+    check(corpus['ranking_version']=='search-v1' and len(corpus['queries'])==3,'fixed search evaluation corpus contract')
+    sample=search_mod.evaluate_query(['EVAL-ASTERION-VILLA','EVAL-ASTERION-RESIDENCE'],corpus['queries'][0]['relevance'])
+    check(abs(sample['rr']-1.0)<1e-12 and abs(sample['ndcg10']-1.0)<1e-12 and abs(sample['precision10']-0.2)<1e-12,'search relevance metric math')
+    check(len(search_mod.corpus_sha256(corpus_path))==64,'search corpus SHA-256 evidence')
+
     # Large carts must generate multipage vouchers instead of overflowing one sheet.
     workers_path=str(ROOT/'workers')
     if workers_path not in sys.path: sys.path.insert(0,workers_path)

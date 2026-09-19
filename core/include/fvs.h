@@ -378,6 +378,15 @@ FVS_API int fvs_payment_recovery_get(fvs_ctx *ctx,const char *attempt_id,
 FVS_API int fvs_payment_recovery_dashboard(fvs_ctx *ctx,unsigned int days,
                                            char *out_json,size_t out_size);
 
+/* Versioned search-science evidence and online quality telemetry. */
+FVS_API const char *fvs_search_ranking_version(void);
+FVS_API int fvs_search_eval_record(fvs_ctx *ctx,const char *ranking_version,
+                                   const char *corpus_sha256,unsigned int mrr_ppm,
+                                   unsigned int ndcg10_ppm,unsigned int precision10_ppm,
+                                   unsigned int query_count,char *out_json,size_t out_size);
+FVS_API int fvs_search_quality_dashboard(fvs_ctx *ctx,unsigned int days,
+                                         char *out_json,size_t out_size);
+
 /* Durable server-side commerce telemetry and funnel economics. */
 FVS_API int fvs_commerce_event_record(fvs_ctx *ctx,
                                       const char *event_key,

@@ -3,8 +3,8 @@
 from __future__ import annotations
 import os,sys,shutil,subprocess,threading,uuid
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'shim-python'))
-import core
+ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'shim-python'));sys.path.insert(0,str(ROOT/'scripts'))
+import core,search_eval
 
 def check(cond,msg):
     if not cond: raise AssertionError(msg)
@@ -356,5 +356,31 @@ def main():
     recovery_dash=core.payment_recovery_dashboard(1)
     check(recovery_dash['provider_error']>=1 and recovery_dash['manual_review']>=1 and recovery_dash['resolved']>=1,recovery_dash)
 
-    print('PASS MySQL concurrency + booking + support + growth + commerce/social + SEO + commerce telemetry + production ops')
+    # Search science: fixed corpus, deterministic relevance metrics and persisted ranking evidence.
+    corpus_path=ROOT/'tests/fixtures/search_eval_v1.json'
+    corpus=search_eval.load_corpus(corpus_path)
+    check(core.search_ranking_version()==corpus['ranking_version'],'ranking version drift')
+    for row in corpus['inventory']:
+        core.inventory_upsert(row)
+    eval_rows=[]
+    for case in corpus['queries']:
+        result=core.inventory_search_v2({'q':case['query'],'check_in':'2027-08-01','check_out':'2027-08-31','guests':2,'sort':'relevance','limit':10})
+        codes=[x['unit_code'] for x in result['items']]
+        eval_rows.append(search_eval.evaluate_query(codes,case['relevance']))
+    metrics=search_eval.aggregate(eval_rows)
+    check(metrics['mrr']>=0.99,metrics)
+    check(metrics['ndcg10']>=0.95,metrics)
+    check(metrics['precision10']>=0.13,metrics)
+    corpus_sha=search_eval.corpus_sha256(corpus_path)
+    recorded=core.search_eval_record(corpus['ranking_version'],corpus_sha,metrics['mrr'],metrics['ndcg10'],metrics['precision10'],len(corpus['queries']))
+    check(recorded['corpus_sha256']==corpus_sha and recorded['ranking_version']==corpus['ranking_version'],recorded)
+    zero_query='zzzz-no-fvs-search-result-98765'
+    zero=core.inventory_search_v2({'q':zero_query,'check_in':'2027-08-01','check_out':'2027-08-31','guests':2,'sort':'relevance','limit':10})
+    check(zero['total']==0,zero)
+    quality=core.search_quality_dashboard(1)
+    check(quality['last_eval']['corpus_sha256']==corpus_sha,quality)
+    check(any(x['version']==corpus['ranking_version'] for x in quality['ranking_versions']),quality)
+    check(any(x['query']==zero_query for x in quality['top_zero_queries']),quality)
+
+    print('PASS MySQL concurrency + booking + support + growth + commerce/social + SEO + telemetry + payment recovery + search science + production ops')
 if __name__=='__main__':main()

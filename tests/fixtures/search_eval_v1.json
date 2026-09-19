@@ -1,0 +1,102 @@
+{
+  "ranking_version": "search-v1",
+  "inventory": [
+    {
+      "source_ref": "search-eval:asterion-villa",
+      "resort": "Asterion Coral Bay",
+      "unit_code": "EVAL-ASTERION-VILLA",
+      "unit_name": "Ocean Villa",
+      "city": "Cancun",
+      "country": "Mexico",
+      "check_in": "2027-08-10",
+      "check_out": "2027-08-17",
+      "max_guests": 6,
+      "price_minor": 2200000,
+      "currency": "MXN",
+      "active": true,
+      "property_type": "Villa",
+      "bedrooms": 3,
+      "bathrooms": 2.5,
+      "rating": 4.8,
+      "amenities": ["pool", "beach", "wifi"]
+    },
+    {
+      "source_ref": "search-eval:asterion-residence",
+      "resort": "Asterion Residence",
+      "unit_code": "EVAL-ASTERION-RESIDENCE",
+      "unit_name": "Garden Residence",
+      "city": "Tulum",
+      "country": "Mexico",
+      "check_in": "2027-08-10",
+      "check_out": "2027-08-17",
+      "max_guests": 4,
+      "price_minor": 1800000,
+      "currency": "MXN",
+      "active": true,
+      "property_type": "Residence",
+      "bedrooms": 2,
+      "bathrooms": 2,
+      "rating": 4.5,
+      "amenities": ["pool", "wifi"]
+    },
+    {
+      "source_ref": "search-eval:elyria-suite",
+      "resort": "Laguna Grand",
+      "unit_code": "EVAL-ELYRIA-SUITE",
+      "unit_name": "Elyria Sea Suite",
+      "city": "Elyria",
+      "country": "Mexico",
+      "check_in": "2027-08-10",
+      "check_out": "2027-08-17",
+      "max_guests": 4,
+      "price_minor": 1600000,
+      "currency": "MXN",
+      "active": true,
+      "property_type": "Suite",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "rating": 4.7,
+      "amenities": ["beach", "wifi"]
+    },
+    {
+      "source_ref": "search-eval:zenith-ibiza",
+      "resort": "Zenith Ibiza",
+      "unit_code": "EVAL-ZENITH-IBIZA",
+      "unit_name": "Zenith Sea Suite",
+      "city": "Ibiza",
+      "country": "Spain",
+      "check_in": "2027-08-10",
+      "check_out": "2027-08-17",
+      "max_guests": 4,
+      "price_minor": 320000,
+      "currency": "EUR",
+      "active": true,
+      "property_type": "Suite",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "rating": 4.9,
+      "amenities": ["beach", "wifi"]
+    }
+  ],
+  "queries": [
+    {
+      "query": "Asterion",
+      "relevance": {
+        "EVAL-ASTERION-VILLA": 3,
+        "EVAL-ASTERION-RESIDENCE": 2
+      }
+    },
+    {
+      "query": "Elyria",
+      "relevance": {
+        "EVAL-ELYRIA-SUITE": 3
+      }
+    },
+    {
+      "query": "Zenith Ibiza",
+      "relevance": {
+        "EVAL-ZENITH-IBIZA": 3
+      }
+    }
+  ]
+}
